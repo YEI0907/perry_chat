@@ -1,0 +1,16 @@
+# 日志配置文件
+log_verbose: true
+log_path: "/Users/lxw/Yplin/Projections/perry_chat/logs"
+# level可选值: INFO, DEBUG, WARNING, ERROR, CRITICAL
+log_kwargs:
+  handlers:
+    - sink: stdout
+      format: '<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>'
+      level: DEBUG
+    - sink: perry-chat-log.log
+      level: DEBUG
+      enqueue: true  # 异步写入日志
+      backtrace: true  # 捕获完整的回溯信息
+      diagnose: true  # 捕获详细的诊断信息
+      rotation: "10 MB"
+

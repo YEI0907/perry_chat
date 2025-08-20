@@ -1,0 +1,59 @@
+[project]
+name = "hw-chat"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate==0.32.1",
+    "aerich>=0.9.1",
+    "asttokens==2.4.1",
+    "asyncmy==0.2.9",
+    "blinker>=1.6.2",
+    "bs4==0.0.2",
+    "charset-normalizer==3.1.0",
+    "chromadb==0.5.3",
+    "datasets==2.20.0",
+    "executing==2.0.1",
+    "faiss-cpu==1.8.0",
+    "fastapi==0.111.0",
+    "fastchat==0.1.0",
+    "fschat==0.2.36",
+    "html2text==2024.2.26",
+    "httpx-sse==0.4.0",
+    "langchain==0.2.7",
+    "langchain-chroma==0.1.1",
+    "langchain-community==0.2.7",
+    "langchain-openai==0.1.15",
+    "langchainhub==0.1.20",
+    "llama-index==0.10.55",
+    "loguru==0.7.2",
+    "markdownify==0.13.1",
+    "passlib==1.7.4",
+    "psutil==6.0.0",
+    "pydantic-settings>=2.10.1",
+    "pymilvus==2.4.4",
+    "pymupdf4llm==0.0.9",
+    "pymysql==1.1.1",
+    "pypdf2==3.0.1",
+    "pytest>=8.4.1",
+    "sentence-transformers==2.2.2",
+    "sentencepiece==0.2.0",
+    "shortuuid==1.0.13",
+    "six==1.16.0",
+    "spacy==3.7.5",
+    "sse-starlette==2.1.2",
+    "strsimpy==0.2.1",
+    "torch==2.3.0",
+    "torchaudio==2.3.0",
+    "torchvision==0.18.0",
+    "tortoise-orm[asyncmy]>=0.25.1",
+    "transformers==4.37.2",
+    "unstructured[all-docs]==0.11.8",
+    "wikiextractor==0.1",
+    "zhipuai==2.1.2",
+]
+
+[tool.uv]
+# 将默认的 PyPI 镜像替换为清华大学的镜像
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"

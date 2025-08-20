@@ -1,0 +1,79 @@
+# 知识库配置文件
+# SQL数据库设置
+database_type: "mysql"
+username: "root"
+password: "078814"
+host: "localhost"
+port: 3306
+
+# 向量数据库设置
+default_knowledge_base: ""
+vector_search_top_k: 3
+score_threshold: 1.0
+chunk_size: 250
+overlap_size: 50
+kb_root_path: "./knowledge_base"
+
+# 向量数据库配置 (使用Faiss作为默认配置)
+vector_store:
+  type: "faiss"
+  cached_vs_num: 1
+  cached_memo_vs_num: 1
+
+# 文本切分器配置 (使用中文递归切分器作为默认配置)
+text_splitter:
+  type: "ChineseRecursiveTextSplitter"
+  source: "huggingface"
+  tokenizer_name_or_path: ""
+
+# Embedding模型定制词语的词表文件
+embedding_kword_file: "embedding_keywords.txt"
+
+# 知识库信息
+kb_info:
+  name: "知识库介绍"
+  samples: "关于本项目issue的解答"
+
+# 其他向量数据库配置示例（注释掉，可根据需要启用）
+# vector_store:
+#   # Milvus配置示例
+#   type: "milvus"
+#   host: "localhost"
+#   port: "19530"
+#   user: ""
+#   password: ""
+#   secure: false
+#   kwargs:
+#     search_params: {}
+#     index_params: {}
+
+# vector_store:
+#   # PostgreSQL配置示例
+#   type: "pg"
+#   host: "localhost"
+#   port: "5432"
+#   user: ""
+#   password: ""
+#   database_name: ""
+
+# 其他文本切分器配置示例（注释掉，可根据需要启用）
+# text_splitter:
+#   # Spacy切分器
+#   type: "SpacyTextSplitter"
+#   source: "huggingface"
+#   tokenizer_name_or_path: "gpt2"
+
+# text_splitter:
+#   # 递归字符切分器
+#   type: "RecursiveCharacterTextSplitter"
+#   source: "tiktoken"
+#   tokenizer_name_or_path: "cl100k_base"
+
+# text_splitter:
+#   # Markdown标题切分器
+#   type: "MarkdownHeaderTextSplitter"
+#   headers_to_split_on:
+#     - ["#", "head1"]
+#     - ["##", "head2"]
+#     - ["###", "head3"]
+#     - ["####", "head4"]

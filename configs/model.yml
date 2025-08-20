@@ -1,0 +1,37 @@
+# 模型配置文件
+model_root_path: "./models"
+temperature: 0.8
+llm_models: []  # 可用的LLM模型列表
+
+# 本地模型配置
+local_model_config:
+  embed:   # 本地嵌入模型配置列表
+    - name: "bge-large-zh-v1.5"
+      model_path: "./models/bge-large-zh-v1.5"
+  chat: []   # 本地聊天模型配置列表
+
+# 在线模型配置 (智谱API作为默认配置)
+online_llm_config:
+  type: "zhipu-api"
+  version: "glm-4"
+  provider: "ChatGLMWorker"
+
+# Embedding模型配置
+embedding_model_name: "bge-large-zh-v1.5"
+embedding_device: "auto"  # 可选值: auto, cuda, mps, cpu, xpu
+
+# 其他本地模型配置示例（注释掉，可根据需要启用和配置）
+# local_model_config:
+#   embed:
+#     - name: "text2vec-large-chinese"
+#       model_path: "./models/text2vec-large-chinese"
+#   chat:
+#     - name: "chatglm3-6b"
+#       model_path: "./models/chatglm3-6b"
+
+# OpenAI配置示例（注释掉，可根据需要启用）
+# online_llm_config:
+#   type: "openai-api"
+#   model_name: "gpt-4"
+#   api_base_url: "https://api.openai.com/v1"
+#   openai_proxy: ""

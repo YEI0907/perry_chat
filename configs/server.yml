@@ -1,0 +1,42 @@
+# 服务器配置文件
+
+# 通用服务器设置
+llm_device: "auto"  # 可选值: auto, cuda, cpu
+httpx_timeout: 300.0
+default_bind_host: "127.0.0.1"
+# 临时文件目录, 默认存放在系统的临时文件目录
+# base_temp_dir: ""
+
+# API服务器配置
+api_server:
+  host: "127.0.0.1"
+  port: 6006
+
+# 模型工作器配置
+model_workers:
+  default:
+    host: "127.0.0.1"
+    port: 20002
+    device: "auto"  # 可选值: auto, cuda, cpu
+
+# 控制器配置
+controller:
+  host: "127.0.0.1"
+  port: 20001
+  dispatch_method: "shortest_queue"
+
+# OpenAI API代理配置
+openai_api:
+  host: "127.0.0.1"
+  port: 20000
+
+# 多个模型工作器配置示例（注释掉，可根据需要启用）
+# model_workers:
+#   chatglm:
+#     host: "127.0.0.1"
+#     port: 20002
+#     device: "cuda"
+#   qwen:
+#     host: "127.0.0.1"
+#     port: 20003
+#     device: "cuda"
