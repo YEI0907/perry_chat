@@ -24,21 +24,3 @@ class LogConfig(BaseModel):
         default_factory=lambda: {},
         description="Log 参数"
     )
-
-    @model_validator(mode='after')
-    def validate_and_process_paths(self) -> 'LogConfig':
-        """
-        配置加载后的后处理:
-        1. 确保日志目录存在
-        2. 转换相对路径为绝对路径
-        """
-        # 确保日志目录存在
-        log_path = Path(self.log_path)
-        if not log_path.exists():
-            log_path.mkdir(parents=True, exist_ok=True)
-            print(f"Created log directory at: {log_path}")
-        
-        # 确保log_path是绝对路径
-        self.log_path = str(log_path.absolute())
-        
-        return self

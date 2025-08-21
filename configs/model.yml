@@ -12,9 +12,9 @@ local_model_config:
 
 # 在线模型配置 (智谱API作为默认配置)
 online_llm_config:
-  type: "zhipu-api"
-  version: "glm-4"
-  provider: "ChatGLMWorker"
+   type: "openai-api"
+   model_name: "qwen-plus"
+   api_base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # Embedding模型配置
 embedding_model_name: "bge-large-zh-v1.5"

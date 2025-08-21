@@ -48,7 +48,7 @@ class KnowledgeBaseChat(BaseModel):
             '<问题>{{ question }}</问题>\n',
         description="带上下文的提示内容",
     )
-    emty: str = Field(
+    empty: str = Field(
         default='请你回答我的问题:\n'
             '{{ question }}\n\n',
             description="没有搜索到上下文时候的提示词"

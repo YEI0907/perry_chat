@@ -2,7 +2,7 @@
 
 # LLM聊天提示词模板
 llm_chat:
-  default: "{{ input }}"
+  default: "{input}"
   with_history: |
     你可以根据用户之前的对话和提出的当前问题，提供专业和详细的技术答案。
 
@@ -29,6 +29,6 @@ knowledge_base_chat:
     <指令>根据已知信息，简洁和专业的来回答问题。如果无法从中得到答案，请说 "根据已知信息无法回答该问题"，答案请使用中文。 </指令>
     <已知信息>{{ context }}</已知信息>
     <问题>{{ question }}</问题>
-  emty: |
+  empty: |
     请你回答我的问题:
     {{ question }}
