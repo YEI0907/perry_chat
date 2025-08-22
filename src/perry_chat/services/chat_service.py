@@ -102,7 +102,7 @@ class ChatService:
                                                       )
 
             conversation_callback = ConversationCallbackHandler(
-                massage_repository=self.massage_repository,
+                msg_repo=self.massage_repository,
                 conversation_id=request.conversation_id,
                 message_id=message_id,
                 chat_type=request.prompt_name,

@@ -19,11 +19,12 @@ async def run_chat_demo():
     user_repo = UserRepository()
     message_repo = MassageRepository()
     conversation_repo = ConversationRepository()
-    # await user_repo.create(
-    #     id="test_user_id",
-    #     username="叶鹏林",
-    #     password_hash=hash("1234567")
-    # )
+    if not await user_repo.check_user("test_user_id"):
+        await user_repo.create(
+        id="test_user_id",
+        username="叶鹏林",
+        password_hash=hash("1234567")
+    )
 
     # 创建聊天服务实例
     chat_service = ChatService(
