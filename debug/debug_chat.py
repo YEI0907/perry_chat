@@ -1,9 +1,10 @@
 import asyncio
 import json
 import uuid
-
+import sys
+from pathlib import Path
 from tortoise import Tortoise
-
+sys.path.append(str(Path(__file__).parent.parent / "src"))
 from perry_chat.core.config import settings
 from perry_chat.core.database import DataBase
 from perry_chat.services.chat_service import ChatService
@@ -53,9 +54,9 @@ async def run_chat_demo():
     # 处理响应
     async for chunk in response.body_iterator:
         data = json.loads(chunk)["text"]
-        print(f"收到响应: {data}")
+        print(f"{data}", end="", flush=True)
 
-    print("聊天完成")
+    print("\n聊天完成")
 
 
 if __name__ == "__main__":

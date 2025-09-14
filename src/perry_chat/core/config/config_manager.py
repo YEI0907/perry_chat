@@ -12,6 +12,7 @@ import sys
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
+import traceback
 from typing import Any, Dict, Literal, Optional, Type, TypeVar, Union, get_type_hints
 
 import yaml
@@ -69,7 +70,7 @@ class ConfigManager:
         # 基础路径配置
         self.config_path = os.getenv("CONFIG_PATH", "")
         self.resources_path = os.getenv("RESOURCES_PATH", "")
-        self.llm_api_key = os.getenv("LLM_API_KEY", "")
+        # self.llm_api_key = os.getenv("LLM_API_KEY", "")
 
         # 验证必要的环境变量
         self._validate_env_vars()
@@ -108,6 +109,7 @@ class ConfigManager:
                 self.configs[config_name] = config
             except Exception as e:
                 logger.error(f"加载配置 {config_name} 失败: {str(e)}")
+                logger.error(traceback.format_exc())
                 # 使用默认配置
                 self.configs[config_name] = config_class()
 
@@ -125,11 +127,11 @@ class ConfigManager:
             except Exception as e:
                 logger.error(f"读取配置文件 {config_file} 失败: {str(e)}")
 
-        # 注入特殊配置值
-        if config_name == "model" and self.llm_api_key:
-            if "online_llm_config" not in config_data:
-                config_data["online_llm_config"] = {}
-            config_data["online_llm_config"]["api_key"] = self.llm_api_key
+        # # 注入特殊配置值
+        # if config_name == "model" and self.llm_api_key:
+        #     if "online_llm_config" not in config_data:
+        #         config_data["online_llm_config"] = {}
+        #     config_data["online_llm_config"]["api_key"] = self.llm_api_key
 
         # 创建并返回配置实例
         try:

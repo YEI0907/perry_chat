@@ -45,7 +45,7 @@ class Settings(BaseModel):
     # 环境变量
     config_path: str = Field(default="", description="配置文件目录路径")
     resources_path: str = Field(default="", description="资源文件目录路径")
-    llm_api_key: str = Field(default="", description="大模型APIKEY")
+    # llm_api_key: str = Field(default="", description="大模型APIKEY")
 
     def __init__(self, **data):
         """初始化项目配置"""
@@ -55,7 +55,7 @@ class Settings(BaseModel):
         # 设置环境变量
         data["config_path"] = config_manager.config_path
         data["resources_path"] = config_manager.resources_path
-        data["llm_api_key"] = config_manager.llm_api_key
+        # data["llm_api_key"] = config_manager.llm_api_key
 
         # 设置各模块配置
         data["kb"] = config_manager.kb

@@ -20,7 +20,7 @@ from perry_chat.core.config.settings import settings
 # 打印配置信息
 logger.info(f"配置路径: {settings.config_path}")
 logger.info(f"资源路径: {settings.resources_path}")
-logger.info(f"模型根目录: {settings.model.model_root_path}")
+logger.info(f"模型API配置: {settings.model.llm_models}")
 logger.info(f"知识库根目录: {settings.kb.kb_root_path}")
 
 # 方法2: 使用配置管理器
@@ -28,7 +28,7 @@ from perry_chat.core.config.config_manager import get_config_manager
 
 config_manager = get_config_manager()
 model_config = config_manager.get_config("model")
-logger.info(f"模型温度: {model_config.temperature}")
+# logger.info(f"模型温度: {model_config.temperature}")
 
 # 重新加载配置
 settings.reload()
