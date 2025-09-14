@@ -119,3 +119,5 @@ secrets.yaml
 *.ini
 /uv.lock
 .env
+
+configs/*.yml
