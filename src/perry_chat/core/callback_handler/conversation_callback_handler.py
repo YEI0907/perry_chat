@@ -1,14 +1,19 @@
 from typing import Any, Dict, List
-
-from langchain.callbacks.base import BaseCallbackHandler
 from langchain.schema import LLMResult
+from langchain.callbacks.base import BaseCallbackHandler
 from perry_chat.db.repository.message_repo import MassageRepository
 
 
 class ConversationCallbackHandler(BaseCallbackHandler):
     raise_error: bool = True
 
-    def __init__(self, msg_repo: MassageRepository, conversation_id: str, message_id: str, chat_type: str, query: str):
+    def __init__(self,
+         msg_repo: MassageRepository,
+         conversation_id: str,
+         message_id: str,
+         chat_type: str,
+         query: str
+    ):
         self.msg_repo = msg_repo
         self.conversation_id = conversation_id
         self.message_id = message_id
@@ -29,4 +34,4 @@ class ConversationCallbackHandler(BaseCallbackHandler):
 
     async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         answer = response.generations[0][0].text
-        await self.msg_repo.update_message(self.message_id, answer)
+        await self.msg_repo.update_message(self.message_id, response=answer)

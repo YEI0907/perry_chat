@@ -4,7 +4,7 @@ database_type: "mysql"
 username: "root"
 password: "078814"
 host: "localhost"
-port: 3315
+port: 3306
 
 # 向量数据库设置
 default_knowledge_base: ""
