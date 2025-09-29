@@ -1,5 +1,5 @@
 [project]
-name = "hw-chat"
+name = "perry-chat"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -57,3 +57,12 @@ dependencies = [
 [tool.uv]
 # 将默认的 PyPI 镜像替换为清华大学的镜像
 index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+
+[tool.hatch.build.targets.wheel]
+# 告诉 hatchling 我们的包在 "src" 目录下，包的名称是 "hw_chat"
+# hatchling 会自动包含这个目录下的所有内容来构建 Wheel 文件
+packages = ["src/perry_chat"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

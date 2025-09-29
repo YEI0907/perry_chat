@@ -12,57 +12,14 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, model_validator
 from loguru import logger
 
-
-class LocalChatModelConfig(BaseModel):
-    """本地模型配置"""
-    name: str = Field(
-        ...,
-        description="模型名称"
-    )
-    model_path: str = Field(
-        ...,
-        description="模型路径"
-    )
-    
-class LocalEmbedModelConfig(BaseModel):
-    """本地模型配置"""
-    name: str = Field(
-        ...,
-        description="模型名称"
-    )
-    model_path: str = Field(
-        ...,
-        description="模型路径"
-    )
-    
-class LocalModelConfig(BaseModel):
-    embed: List[LocalEmbedModelConfig] = Field(
-        default_factory=list,
-        description="本地嵌入模型配置"
-    )
-    chat: List[LocalChatModelConfig] = Field(
-        default_factory=list,
-        description="本地聊天模型配置"
-    )
-
-class ZhipuAPIConfig(BaseModel):
-    """智谱API配置"""
-    type: Literal["zhipu-api"] = "zhipu-api"
-    api_key: Optional[str] = Field(default=None, description="智谱API密钥")
-    version: str = Field(default="glm-4", description="模型版本")
-    provider: str = Field(default="ChatGLMWorker", description="模型提供者")
-
-
-class OpenAIConfig(BaseModel):
-    """OpenAI配置"""
-    type: Literal["openai-api"] = "openai-api"
-    # model_name: str = Field(default="gpt-4", description="模型名称")
-    api_base_url: str = Field(default="https://api.openai.com/v1", description="API基础URL")
-    api_key: Optional[str] = Field(default=None, description="OpenAI API密钥")
-    openai_proxy: str = Field(default="", description="OpenAI代理地址")
-
 class LLMAPI(BaseModel):
     """大模型API配置"""
+    name: str = Field(..., description="API名称")
+    models: List[str] = Field(..., description="支持的模型列表")
+    api_key: Optional[str] = Field(default=None, description="API密钥")
+    api_base_url: str = Field(default="https://api.openai.com/v1", description="API基础URL")
+
+class EmbedAPI(BaseModel):
     name: str = Field(..., description="API名称")
     models: List[str] = Field(..., description="支持的模型列表")
     api_key: Optional[str] = Field(default=None, description="API密钥")
@@ -79,19 +36,19 @@ class ModelConfig(BaseModel):
         description="大模型的API配置"
     )
 
+    embed_apis: List[EmbedAPI] = Field(
+        default=[],
+        description="嵌入模型的API配置"
+    )
+
+    embed_models: Dict[str, EmbedAPI] = Field(
+        default_factory=dict,
+        description="嵌入模型-API配置映射"
+    )
+
     llm_models: Dict[str, LLMAPI] = Field(
         default_factory=dict,
         description="大模型名称-API配置映射"
-    )
-    
-    embedding_model_name: str = Field(
-        default="",
-        description="选用的Embedding模型名称"
-    )
-    
-    embedding_device: Literal["auto", "cuda", "mps", "cpu", "xpu"] = Field(
-        default="auto",
-        description="Embedding模型运行设备"
     )
     
     @model_validator(mode="after")
@@ -105,6 +62,17 @@ class ModelConfig(BaseModel):
             for llm_api in self.llm_apis:
                 for model in llm_api.models:
                     self.llm_models[model] = llm_api
+        return self
+
+    @model_validator(mode="before")
+    def load_embed_models(self) -> "ModelConfig":
+
+        if self.embed_apis:
+            logger.info(f"正在配置{len(self.embed_apis)}个嵌入模型API")
+            for embed_api in self.embed_apis:
+                for model in embed_api.models:
+                    self.embed_models[model] = embed_api
+
         return self
         
     # @model_validator(mode='after')

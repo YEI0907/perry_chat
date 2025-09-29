@@ -45,13 +45,7 @@ class History(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    """
-    聊天路由的请求体
-    :param query: 用户输入的问题
-    :param model_name: 使用哪个大模型作为后端服务
-    :param temperature: 采样温度
-    :param max_tokens: 最大输入Token限制
-    """
+
     query: str = Field(..., description="用户的输入")
     model_name: str = Field("qwen-flash", description="LLM 模型名称。")
 
@@ -70,4 +64,10 @@ class ChatRequest(BaseModel):
     temperature: float = Field(0.8, description="LLM 采样温度", ge=0.0, le=2.0)
     max_tokens: Optional[int] = Field(None, description="限制LLM生成Token数量，默认None代表模型最大值")
     prompt_name: str = Field("default", description="使用的prompt模板名称(在configs/prompt_config.py中配置)")
+
+
+class KBChatRequest(ChatRequest):
+    knowledge_base_name: str = Field(..., description="知识库名称")
+    top_k: int = Field(..., description="向量匹配数量")
+    score_threshold: float = Field(default=1, ge=0.0, le=2.0, description="知识库匹配相关度阈值，取值范围在0-1之间，SCORE越小，相关度越高，取到1相当于不筛选，建议设置在0.5左右")
 

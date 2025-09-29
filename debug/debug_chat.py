@@ -4,7 +4,7 @@ import uuid
 import sys
 from pathlib import Path
 from tortoise import Tortoise
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+# sys.path.append(str(Path(__file__).parent.parent / "src"))
 from perry_chat.core.config import settings
 from perry_chat.core.database import DataBase
 from perry_chat.services.chat_service import ChatService

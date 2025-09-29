@@ -16,12 +16,12 @@ from pathlib import Path
 class KBInfo(BaseModel):
     """每个知识库的初始化介绍, 用于在初始化知识库时显示和Agent调用, 没写则没有介绍, 不会被Agent调用。"""
     name: str = Field(
-        default="知识库介绍",
+        ...,
         description="知识库名称"
     )
-    samples: str = Field(
-        default="关于本项目issue的解答",
-        description="知识库示例"
+    description: str = Field(
+        ...,
+        description="知识库介绍"
     )
 
 class VectorDatabaseConfig(ABC, BaseModel):
@@ -291,7 +291,8 @@ class KBConfig(BaseModel):
             logger.info(f"Created knowledge base directory at: {kb_path}")
 
         # 确保kb_root_path是绝对路径
-        self.kb_root_path = str(kb_path.absolute())
+        if not kb_path.is_absolute():
+            self.kb_root_path = str(kb_path.absolute())
 
         # 如果embedding关键词文件路径是相对路径，转换为绝对路径
         if self.embedding_kword_file and not os.path.isabs(self.embedding_kword_file):

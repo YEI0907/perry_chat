@@ -167,3 +167,5 @@ class ChatService:
             await task
 
         return EventSourceResponse(chat_iterator())
+
+    async def knowledge_base_chat(self, request: ChatRequest):
