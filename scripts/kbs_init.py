@@ -1,0 +1,164 @@
+from perry_chat.core.knowledge_base.document_loaders.pdfloader import UnstructuredLightPipeline
+
+import json
+import os
+from pathlib import Path
+import asyncio
+
+from perry_chat.core.knowledge_base.kb_services import KBServiceFactory
+from perry_chat.core.knowledge_base.kb_services.faiss_kb_service import FaissKBService
+from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
+from perry_chat.core.knowledge_base.utils import KnowledgeFile
+from perry_chat.core.config import load_settings
+from perry_chat.core.database_manager import DataBaseManager
+from concurrent.futures import ProcessPoolExecutor
+
+
+
+settings = load_settings()
+kb_repo = KBRepository()
+kb_file_repo = KnowledgeFileRepository()
+file_doc_repo = FileDocRepository()
+EMBED_MODEL = list(settings.model.embed_models.keys())[0]
+API_ENDPOINT = settings.model.embed_models[EMBED_MODEL].api_base_url
+
+async def process_and_add_document(file_path, faiss_service):
+
+    kb = await KBServiceFactory.get_service_by_name("private")
+
+    # 如果想要使用的向量数据库的collecting name 不存在，则进行创建
+    if kb is None:
+
+        # 先在Mysql中创建向量数据库的基本信息
+        await kb_repo.add_kb(
+            kb_name="private",
+            kb_info="private",
+            vs_type="faiss",
+            embed_model=EMBED_MODEL,
+            api_endpoint=API_ENDPOINT,
+            user_id="test_user_id"
+        )
+
+    processor = UnstructuredLightPipeline(settings)
+    docs = await processor.run_pipeline(file_path, ['unstructured'])
+
+
+    # 创建 KnowledgeFile 对象
+    kb_file = KnowledgeFile(Path(file_path).name, "private")
+
+    # 添加文档到 FAISS 服务
+    added_docs_info = await faiss_service.add_doc(kb_file, docs=docs)
+    print(f"Added documents for {file_path}: {added_docs_info}")
+
+
+async def main():
+    # 文件夹路径，包含所有PDF文件
+    folder_path = '/Users/lxw/Yplin/Projections/perry_chat/resources/knowledge_base/private/content'
+    pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
+
+    # 实例化 FaissKBService
+    faiss_service = FaissKBService(
+        "private",
+        embed_model=EMBED_MODEL,
+        kb_description="初始阶段的私有数据集",
+        settings=settings,
+        kb_repo=kb_repo,
+        kb_file_repo=kb_file_repo,
+        file_doc_repo=file_doc_repo
+    )
+
+    # 处理每一个PDF文件
+    for pdf_file in pdf_files:
+        full_path = os.path.join(folder_path, pdf_file)
+        await process_and_add_document(full_path, faiss_service)
+
+
+async def wiki_main():
+    from langchain.schema import Document
+    file_path = "/Users/lxw/Yplin/Projections/perry_chat/resources/knowledge_base/wiki/content/education.jsonl"
+    # 创建一个空的 Document 列表
+    docs = []
+    # 打开文件并读取每一行
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                try:
+                    # 解析 JSON 数据
+                    data = json.loads(line)
+                    # 创建一个 Document 对象
+                    document = Document(page_content=data['contents'],
+                                        metadata={'source': file_path})
+                    # 将 Document 对象添加到列表中
+                    docs.append(document)
+                except json.JSONDecodeError as e:
+                    # 如果 JSON 数据有问题，打印错误信息并跳过
+                    print(f"Error decoding JSON: {e}")
+                except KeyError as e:
+                    # 如果缺少预期的键
+                    print(f"Missing key in JSON data: {e}")
+    except Exception as e:
+        print(f"Failed to read file: {e}")
+
+
+
+    # 实例化 FaissKBService
+    faiss_service = FaissKBService(
+        "wiki",
+        embed_model = EMBED_MODEL,
+        kb_description = "初始阶段的公共Wiki数据集",
+        settings = settings,
+        kb_repo = kb_repo,
+        kb_file_repo = kb_file_repo,
+        file_doc_repo = file_doc_repo
+    )
+
+    kb = await KBServiceFactory.get_service_by_name("wiki")
+
+    # 如果想要使用的向量数据库的collecting name 不存在，则进行创建
+    if kb is None:
+        print("向量数据库不存在，正在创建...")
+        # 先在Mysql中创建向量数据库的基本信息
+        await kb_repo.add_kb(kb_name="wiki",
+                           kb_info="wiki",
+                           vs_type="faiss",
+                           embed_model=EMBED_MODEL,
+                             api_endpoint=API_ENDPOINT,
+                           user_id="test_user_id")
+
+    # print(faiss_service)
+    # 创建 KnowledgeFile 对象，注意这里只传递文件名和知识库名称
+    kb_file = KnowledgeFile("education.jsonl", "wiki")
+    print("添加文档到FAISS服务...")
+    # 添加文档到 FAISS 服务
+    added_docs_info = await faiss_service.add_doc(kb_file, docs=docs)
+
+    print("Added documents:", added_docs_info)
+
+
+
+async def sequential_execution():
+    await DataBaseManager(settings).init_connect()
+    # print("处理pdf")
+    # await main()
+    print("处理wiki")
+    await wiki_main()
+
+
+async def test_query():
+    faissService = FaissKBService(
+        "private",
+            embed_model = EMBED_MODEL,
+            kb_description = "初始阶段的私有数据集",
+            settings = settings,
+            kb_repo = kb_repo,
+            kb_file_repo = kb_file_repo,
+            file_doc_repo = file_doc_repo
+    )
+    search_ans = await faissService.search_docs(query="GLM多角色对话系统解释")
+    print(search_ans)
+
+if __name__ == '__main__':
+    ##数据入库
+    asyncio.run(sequential_execution())
+    # 测试
+    asyncio.run(test_query())

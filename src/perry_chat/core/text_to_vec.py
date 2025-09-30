@@ -43,7 +43,8 @@ class Text2Vector:
                 base_url=v.api_base_url,
                 api_key=v.api_key,
                 dimensions=v.dimensions,
-                check_embedding_ctx_length=False
+                check_embedding_ctx_length=False,
+                show_progress_bar=True
             )
             for k,v in self.settings.model.embed_models.items()
         }

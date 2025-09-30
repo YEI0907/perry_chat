@@ -4,13 +4,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # from text_splitter import zh_title_enhance as func_zh_title_enhance
 import langchain.document_loaders
-from perry_chat.core.text_splitter import zh_title_enhance as func_zh_title_enhance
+from perry_chat.core.knowledge_base.text_splitter import zh_title_enhance as func_zh_title_enhance
 from langchain.docstore.document import Document
 from langchain.text_splitter import TextSplitter
 from pathlib import Path
 import json
 from typing import List, Union, Dict, Tuple, Generator, Callable
-from perry_chat.core.config import load_settings, Settings
+from perry_chat.core.config import load_settings
 from loguru import logger
 
 
@@ -324,7 +324,7 @@ class KnowledgeFile:
         logger.debug(f"文本拆分器名称: {self.text_splitter_name}")
 
         # 打印 self.kb_name
-        logger.debug(f"self.kb_name:{self.kb_name}")
+        logger.debug(f"数据库名称:{self.kb_name}")
 
     def file2docs(self, refresh: bool = False):
         if self.docs is None or refresh:

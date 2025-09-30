@@ -103,6 +103,10 @@ class KBService(ABC, Generic[CACHE_POOL]):
         """
         return self.text_to_vec.embed_documents(docs, model_name=self.embed_model)# embed_documents(docs=docs, embed_model=self.embed_model, to_query=False)
 
+    async def _adocs_to_embeddings(self, docs: List[Document]) -> DocEmbedResult:
+        result = await self.text_to_vec.aembed_documents(docs=docs, embed_model=self.embed_model)
+        return result
+
     async def add_doc(self, kb_file: KnowledgeFile, docs: List[Document] = [], **kwargs):
         """
         向知识库添加文件
@@ -128,7 +132,7 @@ class KBService(ABC, Generic[CACHE_POOL]):
                         rel_path = Path(source).relative_to(self.doc_path)
                         doc.metadata["source"] = str(rel_path.as_posix().strip("/"))
                 except Exception as e:
-                    print(f"cannot convert absolute path ({source}) to relative path. error is : {e}")
+                    logger.error(f"cannot convert absolute path ({source}) to relative path. error is : {e}")
 
             # self.delete_doc(kb_file)
             doc_infos = await self.do_add_doc(docs, **kwargs)

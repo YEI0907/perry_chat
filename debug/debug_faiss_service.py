@@ -40,7 +40,7 @@ async def main():
                            user_id="test_user_id")
 
     # 调用 add_doc 方法添加一个名为 "README.md" 的文桗，确保使用 await
-    await faiss_service.add_doc(KnowledgeFile("invoice_1.pdf", "samples"))
+    await faiss_service.add_doc(KnowledgeFile("README.md", "test"))
     print(f"添加文档完成")
     # 根据输入进行检索
     search_ans = await faiss_service.search_docs(query="hw-chat 项目的后端服务？")
