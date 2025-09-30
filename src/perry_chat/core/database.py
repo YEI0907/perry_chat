@@ -1,9 +1,10 @@
 # database.py
 
 from fastapi import FastAPI
+from loguru import logger
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
-from .config import settings
+from .config import Settings
 # --- 在这里定义你的数据库配置 ---
 
 # 数据库连接URL，建议从环境变量或配置文件中读取
@@ -22,15 +23,16 @@ class DataBase:
     """
     数据库管理类，用于初始化和关闭连接。
     """
+    def __init__(self, settings: Settings):
+        self.settings = settings
 
-    @staticmethod
-    def get_tortoise_config() -> dict:
+    def get_tortoise_config(self) -> dict:
         """
         生成 Tortoise ORM 的配置字典。
         """
         config = {
             "connections": {
-                "default": settings.kb.get_database_url()
+                "default": self.settings.kb.database_url
             },
             "apps": {
                 "models": {
@@ -43,27 +45,26 @@ class DataBase:
         }
         return config
 
-    @classmethod
-    def init(cls, app: FastAPI):
+    def init(self, app: FastAPI):
         """
         将 Tortoise ORM 注册到 FastAPI 应用。
 
         :param app: FastAPI 应用实例
         """
-        settings.logger("Initializing database...")
+        logger.info("Initializing database...")
         register_tortoise(
             app,
-            config=cls.get_tortoise_config(),
+            config=self.get_tortoise_config(),
             generate_schemas=True,  # 在开发环境中设为True，生产环境建议设为False并使用迁移工具
             add_exception_handlers=True,
         )
-        settings.logger("Database initialization complete.")
+        logger.info("Database initialization complete.")
 
     @staticmethod
     async def close():
         """
         手动关闭数据库连接（通常由 register_tortoise 自动处理）。
         """
-        settings.logger.info("Closing database connections...")
+        logger.info("Closing database connections...")
         await Tortoise.close_connections()
-        settings.logger.info("Database connections closed.")
+        logger.info("Database connections closed.")

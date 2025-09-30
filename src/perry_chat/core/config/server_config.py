@@ -68,6 +68,12 @@ class OpenAIAPIConfig(BaseModel):
 
 class ServerConfig(BaseModel):
     """服务器总配置"""
+
+    cached_num: int = Field(
+        default=10,
+        description="LRU缓存的数量"
+    )
+
     llm_device: Literal["auto", "cuda", "cpu"] = Field(
         default="auto",
         description="LLM模型运行设备"

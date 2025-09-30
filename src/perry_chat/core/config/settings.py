@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-'''
+"""
 @File       : settings.py
 @CreateTime : 2025/08/22 16:45:00
 @Author     : Penglin.Ye
 @Desc       : 项目配置类
-'''
-
-import os
-from pathlib import Path
+"""
 from typing import Any, ClassVar
 
 from loguru import logger
@@ -94,4 +91,4 @@ class Settings(BaseModel):
 
 
 # 全局配置实例
-settings = Settings.load()
+# settings = Settings.load()

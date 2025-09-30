@@ -16,7 +16,7 @@ from perry_chat.db.repository.conversation_repo import ConversationRepository
 from perry_chat.db.repository.message_repo import MassageRepository
 from perry_chat.db.repository.user_repo import UserRepository
 from perry_chat.schemas.chat import ChatRequest
-from perry_chat.core.config import settings
+from perry_chat.core.config import Settings
 
 
 
@@ -25,11 +25,13 @@ class ChatService:
     def __init__(self,
              user_repository: UserRepository,
              massage_repository: MassageRepository,
-            conversation_repository: ConversationRepository
+                conversation_repository: ConversationRepository,
+                 settings: Settings
          ):
         self.user_repository = user_repository
         self.massage_repository = massage_repository
         self.conversation_repository = conversation_repository
+        self.settings = settings
 
     async def add_message_to_db(self,
         user_id: str,
@@ -123,12 +125,12 @@ class ChatService:
                 callbacks=callbacks,
             )
 
-            prompt = settings.prompt.llm_chat.default
+            prompt = self.settings.prompt.llm_chat.default
             if request.history:  # 优先使用前端传入的历史消息
                 pass
             elif request.conversation_id and request.history_len > 0:  # 前端要求从数据库取历史消息
                 # 使用memory 时必须 prompt 必须含有memory.memory_key 对应的变量
-                prompt = settings.prompt.llm_chat.with_history
+                prompt = self.settings.prompt.llm_chat.with_history
                 # 根据conversation_id 获取message 列表进而拼凑 memory
                 memory = ConversationBufferDBMemory(
                     message_repo=self.massage_repository,

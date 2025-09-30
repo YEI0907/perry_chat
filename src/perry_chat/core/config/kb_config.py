@@ -7,7 +7,7 @@
 @Desc       : 知识库配置    
 '''
 import os
-from typing import Any, List, Literal, Tuple, Union
+from typing import Any, List, Literal, Tuple, Union, Dict
 from loguru import logger
 from pydantic import BaseModel, Field, model_validator
 from abc import ABC
@@ -126,8 +126,10 @@ class TextSplitterConfig(ABC, BaseModel):
     pass
 
 class ChineseRecursiveConfig(TextSplitterConfig):
-    """中文递归切分器配置"""
+    """
+    中文递归切分器配置
     type: Literal["ChineseRecursiveTextSplitter"] = "ChineseRecursiveTextSplitter"
+    """
     source: Literal["huggingface", "tiktoken"] = Field(
         default="huggingface",
         description="tokenizer来源"
@@ -138,8 +140,10 @@ class ChineseRecursiveConfig(TextSplitterConfig):
     )
 
 class SpacyConfig(TextSplitterConfig):
-    """Spacy切分器配置"""
+    """
+    Spacy切分器配置
     type: Literal["SpacyTextSplitter"] = "SpacyTextSplitter"
+    """
     source: Literal["huggingface"] = Field(
         default="huggingface",
         description="tokenizer来源"
@@ -150,8 +154,10 @@ class SpacyConfig(TextSplitterConfig):
     )
 
 class RecursiveCharacterConfig(TextSplitterConfig):
-    """递归字符切分器配置"""
+    """
+    递归字符切分器配置
     type: Literal["RecursiveCharacterTextSplitter"] = "RecursiveCharacterTextSplitter"
+    """
     source: Literal["tiktoken"] = Field(
         default="tiktoken",
         description="tokenizer来源"
@@ -162,8 +168,11 @@ class RecursiveCharacterConfig(TextSplitterConfig):
     )
 
 class MarkdownHeaderConfig(TextSplitterConfig):
-    """Markdown标题切分器配置"""
-    type: Literal["MarkdownHeaderTextSplitter"] = "MarkdownHeaderTextSplitter"
+    """
+    Markdown标题切分器配置
+    # type: Literal["MarkdownHeaderTextSplitter"] = "MarkdownHeaderTextSplitter"
+    """
+
     headers_to_split_on: List[Tuple[str, str]] = Field(
         default=[
             ("#", "head1"),
@@ -186,7 +195,8 @@ AllVectorStoreConfigs = Union[FaissConfig, MilvusConfig, ZillizConfig, PGConfig]
 
 class KBConfig(BaseModel):
     """知识库的配置类, 包含sql数据库以及向量数据库"""
-    
+    KB_TYPES: list[str] =  ["faiss", "milvus", "zilliz", "pg"]
+
     # sql数据库设置
     database_type: str = Field(
         default="mysql",
@@ -209,6 +219,15 @@ class KBConfig(BaseModel):
         default=3306,
         description="Port for the SQLdatabase"
     )
+
+    zh_title_enhance: bool = Field(
+        default=False,
+        description="""
+        是否开启中文标题加强，以及标题增强的相关配置
+        通过增加标题判断，判断哪些文本为标题，并在metadata中进行标记；
+        然后将文本与往上一级的标题进行拼合，实现文本信息的增强。
+        """
+    )
     
     # 向量数据库
     default_knowledge_base: str = Field(
@@ -227,7 +246,7 @@ class KBConfig(BaseModel):
     )
     
     chunk_size: int = Field(
-        default=250,
+        default=500,
         description="每个文本块的大小, 不适用MarkdownHeaderTextSplitter"
     )
     overlap_size: int = Field(
@@ -247,10 +266,32 @@ class KBConfig(BaseModel):
         discriminator='type', 
         description="向量数据库的配置"
     )
+
+    text_splitter_name: Literal[
+        "ChineseRecursiveTextSplitter",
+        "SpacyTextSplitter",
+        "RecursiveCharacterTextSplitter",
+        "MarkdownHeaderTextSplitter"
+    ] = Field(
+        default="ChineseRecursiveTextSplitter",
+        description="文本切分器的名称"
+    )
     
-    text_splitter: AllTextSplitterConfigs = Field(
-        default=ChineseRecursiveConfig(type="ChineseRecursiveTextSplitter"),
-        discriminator='type',
+    text_splitters: Dict[
+        Literal[
+            "ChineseRecursiveTextSplitter",
+            "SpacyTextSplitter",
+            "RecursiveCharacterTextSplitter",
+            "MarkdownHeaderTextSplitter"
+        ],
+        AllTextSplitterConfigs
+    ] = Field(
+        default={
+            "ChineseRecursiveTextSplitter": ChineseRecursiveConfig(),
+            "SpacyTextSplitter": SpacyConfig(),
+            "RecursiveCharacterTextSplitter": RecursiveCharacterConfig(),
+            "MarkdownHeaderTextSplitter": MarkdownHeaderConfig()
+        },
         description="文本切分器的配置"
     )
     
@@ -264,7 +305,8 @@ class KBConfig(BaseModel):
         description="每个知识库的初始化介绍, 用于在初始化知识库时显示和Agent调用,没写则没有介绍,不会被Agent调用。"
     )
 
-    def get_database_url(self):
+    @property
+    def database_url(self):
         return f"{self.database_type}://{self.username}:{self.password}@{self.host}:{self.port}/perry_chat"
     
     @model_validator(mode='after')
@@ -283,12 +325,15 @@ class KBConfig(BaseModel):
             else:
                 resources_path = Path(__file__).resolve().parent.parent / "resources"
                 self.kb_root_path = str(resources_path / "knowledge_base")
-                
-                
+
         kb_path = Path(self.kb_root_path)
+        if not kb_path.is_absolute():
+            raise ValueError(f"知识库地址请使用绝对地址: {self.kb_root_path}")
         if not kb_path.exists():
             kb_path.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Created knowledge base directory at: {kb_path}")
+            logger.warning(f"Created knowledge base directory at: {kb_path}")
+        else:
+            logger.debug(f"Knowledge base directory exists at: {kb_path}")
 
         # 确保kb_root_path是绝对路径
         if not kb_path.is_absolute():

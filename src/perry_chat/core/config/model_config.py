@@ -23,10 +23,11 @@ class EmbedAPI(BaseModel):
     name: str = Field(..., description="API名称")
     models: List[str] = Field(..., description="支持的模型列表")
     api_key: Optional[str] = Field(default=None, description="API密钥")
+    dimensions: Optional[int] = Field(default=None, description="嵌入模型维度")
     api_base_url: str = Field(default="https://api.openai.com/v1", description="API基础URL")
 
 
-OnlineLLMConfigs = Union[ZhipuAPIConfig, OpenAIConfig]
+# OnlineLLMConfigs = Union[ZhipuAPIConfig, OpenAIConfig]
 
 class ModelConfig(BaseModel):
     """模型配置类"""
@@ -64,9 +65,8 @@ class ModelConfig(BaseModel):
                     self.llm_models[model] = llm_api
         return self
 
-    @model_validator(mode="before")
+    @model_validator(mode="after")
     def load_embed_models(self) -> "ModelConfig":
-
         if self.embed_apis:
             logger.info(f"正在配置{len(self.embed_apis)}个嵌入模型API")
             for embed_api in self.embed_apis:

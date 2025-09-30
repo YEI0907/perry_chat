@@ -8,7 +8,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
     def __init__(self):
         super().__init__(KnowledgeBaseModel)
 
-    @atomic
+    @atomic()
     async def add_kb(
         self,
         kb_name: str,
@@ -84,4 +84,9 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
                 "file_count": kb.file_count,
                 "create_time": kb.create_time,
             }
-        return None
+        return {}
+
+
+
+
+

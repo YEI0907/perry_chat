@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from tortoise import Tortoise
 # sys.path.append(str(Path(__file__).parent.parent / "src"))
-from perry_chat.core.config import settings
+from perry_chat.core.config import load_settings
 from perry_chat.core.database import DataBase
 from perry_chat.services.chat_service import ChatService
 from perry_chat.db.repository.user_repo import UserRepository
@@ -27,11 +27,13 @@ async def run_chat_demo():
         password_hash=hash("1234567")
     )
 
+    settings = load_settings()
     # 创建聊天服务实例
     chat_service = ChatService(
         user_repository=user_repo,
         massage_repository=message_repo,
-        conversation_repository=conversation_repo
+        conversation_repository=conversation_repo,
+        settings=settings
     )
 
     # 创建聊天请求

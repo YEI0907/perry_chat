@@ -1,5 +1,5 @@
 
-from perry_chat.core.config.model_config import LLMAPI, OpenAIConfig
+from perry_chat.core.config.model_config import LLMAPI
 from .config import settings
 from typing import Callable, List
 
