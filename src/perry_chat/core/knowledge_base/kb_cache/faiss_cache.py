@@ -1,3 +1,4 @@
+import asyncio
 import threading
 from typing import Union
 
@@ -197,7 +198,8 @@ class KBFaissPool(_FaissPool):
         """
         async with self.async_atomic:
             vector_name = vector_name or embed_model
-            cache = await self.aget((kb_name, vector_name)) # 用元组比拼接字符串好一些
+            # 使用 asyncio.to_thread 避免阻塞
+            cache = await asyncio.to_thread(self.get, (kb_name, vector_name)) # 用元组比拼接字符串好一些
             if cache is None:
                 item = ThreadSafeFaiss((kb_name, vector_name), pool=self)
                 self.set((kb_name, vector_name), item)
@@ -218,18 +220,26 @@ class KBFaissPool(_FaissPool):
 
                         # https://api.python.langchain.com/en/latest/_modules/langchain_community/vectorstores/faiss.html#FAISS
                         # load_local 方法会检查本地是否存在指定的文件，如果存在，它会将这些文件加载到内存中，并返回一个加载好的 FAISS 实例
-                        vector_store = FAISS.load_local(vs_path, embeddings, distance_strategy="METRIC_INNER_PRODUCT", allow_dangerous_deserialization=True)
+                        # 使用 asyncio.to_thread 避免阻塞异步事件循环
+                        vector_store = await asyncio.to_thread(
+                            FAISS.load_local, vs_path, embeddings, 
+                            distance_strategy="METRIC_INNER_PRODUCT", 
+                            allow_dangerous_deserialization=True
+                        )
                     elif create:
                         # create an empty vector store
                         if not os.path.exists(vs_path):
-                            os.makedirs(vs_path)
-                        vector_store = self.new_vector_store(embed_model=embed_model)
-                        vector_store.save_local(vs_path)
+                            await asyncio.to_thread(os.makedirs, vs_path)
+                        vector_store = await asyncio.to_thread(
+                            self.new_vector_store, embed_model=embed_model
+                        )
+                        await asyncio.to_thread(vector_store.save_local, vs_path)
                     else:
                         raise RuntimeError(f"knowledge base {kb_name} not exist.")
                     item.obj = vector_store
                     item.finish_loading()
-            return self.get((kb_name, vector_name))
+            # 使用 asyncio.to_thread 避免阻塞
+            return await asyncio.to_thread(self.get, (kb_name, vector_name))
 
 
 class MemoFaissPool(_FaissPool):

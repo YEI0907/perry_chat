@@ -15,6 +15,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
         kb_info: str,
         vs_type: str,
         embed_model: str,
+        api_endpoint: str,
         user_id: Any
     ) -> bool:
         """
@@ -28,6 +29,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
                 "kb_info": kb_info,
                 "vs_type": vs_type,
                 "embed_model": embed_model,
+                "api_endpoint": api_endpoint,
                 "user_id": user_id,
             },
             kb_name=kb_name,
@@ -49,16 +51,16 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
         # .exists() 是专门用于检查存在性的查询，它比获取整个对象更高效
         return await self.model.filter(kb_name__iexact=kb_name).exists()
 
-    async def load_kb(self, kb_name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    async def load_kb(self, kb_name: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         """
         从数据库加载知识库的核心信息。
         """
         # get_or_none 通过唯一或主键字段获取单个对象，如果不存在则返回 None
         kb = await self.model.get_or_none(kb_name__iexact=kb_name)
         if kb:
-            return kb.kb_name, kb.vs_type, kb.embed_model
+            return kb.kb_name, kb.vs_type, kb.embed_model, kb.description
         else:
-            return None, None, None
+            return None, None, None, None
 
     async def delete_kb(self, kb_name: str) -> bool:
         """

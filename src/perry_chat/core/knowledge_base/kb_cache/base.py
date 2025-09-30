@@ -83,8 +83,6 @@ class ThreadSafeObject(Generic[T]):
         开始加载对象。
         """
         self._loaded.clear()
-
-    async def astart_loading(self):
         self._aloaded.clear()
 
     def finish_loading(self):
@@ -92,8 +90,6 @@ class ThreadSafeObject(Generic[T]):
         完成加载对象。
         """
         self._loaded.set()
-
-    async def afinish_loading(self):
         self._aloaded.set()
 
     def wait_for_loading(self):
@@ -103,7 +99,15 @@ class ThreadSafeObject(Generic[T]):
         self._loaded.wait()
 
     async def await_for_loading(self):
-        await self._aloaded.wait()
+        """
+        异步等待对象加载完成。
+        """
+        # 使用 asyncio.to_thread 避免在等待过程中阻塞事件循环
+        if not self._aloaded.is_set():
+            await asyncio.to_thread(self._loaded.wait)
+        # 确保 asyncio.Event 也处于设置状态
+        if not self._aloaded.is_set():
+            self._aloaded.set()
 
     @property
     def obj(self) -> T:
@@ -138,7 +142,7 @@ class CachePool(Generic[SafeObject]):
             while len(self.cache) > self._cache_num:
                 self.cache.popitem(last=False)
 
-    def get(self, key: str) -> SafeObject|None:
+    def get(self, key: Union[str, Tuple[str, str|None]]) -> SafeObject|None:
         """
         根据键获取缓存对象，并等待对象加载完成。
 
@@ -153,13 +157,13 @@ class CachePool(Generic[SafeObject]):
             return cache
         return None
 
-    async def aget(self, key: str) -> SafeObject|None:
+    async def aget(self, key: Union[str, Tuple[str, str|None]]) -> SafeObject|None:
         if cache := self.cache.get(key):
             await cache.await_for_loading()
             return cache
         return None
 
-    def set(self, key: str, obj: SafeObject) -> SafeObject:
+    def set(self, key: Union[str, Tuple[str, str|None]], obj: SafeObject) -> SafeObject:
         """
          设置缓存对象。
 
@@ -174,7 +178,7 @@ class CachePool(Generic[SafeObject]):
         self._check_count()
         return obj
 
-    def pop(self, key: str = None) -> tuple[Any, SafeObject] | None:
+    def pop(self, key: Union[str, Tuple[str, str|None]] = None) -> tuple[Any, SafeObject] | None:
         """
         移除并返回缓存对象。
 

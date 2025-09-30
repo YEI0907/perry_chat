@@ -1,4 +1,4 @@
-# database.py
+# database_manager.py
 
 from fastapi import FastAPI
 from loguru import logger
@@ -19,7 +19,7 @@ from .config import Settings
 MODELS = ["perry_chat.db.models"] # 假设你的所有模型都在一个名为 "models.py" 的文件中
 
 
-class DataBase:
+class DataBaseManager:
     """
     数据库管理类，用于初始化和关闭连接。
     """
@@ -45,7 +45,11 @@ class DataBase:
         }
         return config
 
-    def init(self, app: FastAPI):
+    async def init_connect(self):
+        await Tortoise.init(self.get_tortoise_config())
+        await Tortoise.generate_schemas()
+
+    def init_app(self, app: FastAPI):
         """
         将 Tortoise ORM 注册到 FastAPI 应用。
 

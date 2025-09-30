@@ -6,7 +6,7 @@ from pathlib import Path
 from tortoise import Tortoise
 # sys.path.append(str(Path(__file__).parent.parent / "src"))
 from perry_chat.core.config import load_settings
-from perry_chat.core.database import DataBase
+from perry_chat.core.database import DataBaseMannager
 from perry_chat.services.chat_service import ChatService
 from perry_chat.db.repository.user_repo import UserRepository
 from perry_chat.db.repository.message_repo import MassageRepository
@@ -14,7 +14,7 @@ from perry_chat.db.repository.conversation_repo import ConversationRepository
 from perry_chat.schemas.chat import ChatRequest
 
 async def run_chat_demo():
-    await Tortoise.init(DataBase.get_tortoise_config())
+    await Tortoise.init(DataBaseMannager.get_tortoise_config())
     await Tortoise.generate_schemas()
     # 初始化所需的仓库
     user_repo = UserRepository()

@@ -3,7 +3,7 @@ from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from loguru import logger
 from perry_chat.core.config import Settings
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple, Any
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +16,7 @@ def normalize(embeddings: List[List[float]] | List[float]) -> np.ndarray:
         embeds = embeds.reshape(1, -1)
     norm = np.linalg.norm(embeds, axis=1)
     norm = np.reshape(norm, (norm.shape[0], 1))
-    norm = np.tile(norm, (1, len(embeddings[0])))
+    norm = np.tile(norm, (1, len(embeds[0])))
     return np.divide(embeddings, norm)
 
 class DocEmbedResult(BaseModel):
@@ -25,6 +25,7 @@ class DocEmbedResult(BaseModel):
     texts: List[str] = Field(default=[], description="文本列表")
     embeddings: Optional[np.ndarray] = Field(default=None, description="文本向量数组")
     metadatas: List[Dict] = Field(default=[], description="元数据列表")
+
 
 class Text2Vector:
     """

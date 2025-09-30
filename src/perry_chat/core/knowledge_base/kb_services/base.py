@@ -1,11 +1,12 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Dict, Tuple, Any, Coroutine, Union
+from typing import List, Dict, Tuple, Any, Coroutine, Union, Type
 from langchain_core.documents import Document
 from loguru import logger
-
+from typing import Generic, TypeVar
 from perry_chat.core.config import settings, Settings
+from ..kb_cache.base import CachePool
 from perry_chat.core.knowledge_base.kb_services.schemas import DocumentWithVSId
 from perry_chat.core.knowledge_base.utils import get_kb_path, get_doc_path, KnowledgeFile
 from perry_chat.core.text_to_vec import Text2Vector, DocEmbedResult
@@ -19,8 +20,9 @@ class SupportedVSType:
     ZILLIZ = 'zilliz'
     CHROMADB = 'chromadb'
 
+CACHE_POOL = TypeVar('CACHE_POOL', bound=CachePool)
 
-class KBService(ABC):
+class KBService(ABC, Generic[CACHE_POOL]):
     """向量数据库基类"""
     def __init__(self,
         knowledge_base_name: str,
@@ -29,7 +31,8 @@ class KBService(ABC):
         settings: Settings,
         kb_repo: KBRepository,
         kb_file_repo: KnowledgeFileRepository,
-        file_doc_repo: FileDocRepository
+        file_doc_repo: FileDocRepository,
+        pool_class: Type[CACHE_POOL]
     ):
         """
 
@@ -38,16 +41,21 @@ class KBService(ABC):
         :param kb_description: 知识库介绍
         """
         self.settings = settings
-        self.text_to_vec = Text2Vector(settings)
         self.kb_name = knowledge_base_name
         self.kb_info = kb_description
         self.embed_model = embed_model
         self.kb_path = get_kb_path(self.kb_name)
         self.doc_path = get_doc_path(self.kb_name)
+
+        self.text_to_vec = Text2Vector(settings)
         self.kb_repo = kb_repo
         self.kb_file_repo = kb_file_repo
         self.file_doc_repo = file_doc_repo
+        self.pool = self._init_pool(pool_class)
         self.do_init()
+
+    def _init_pool(self, pool_class: Type[CACHE_POOL]) -> CACHE_POOL:
+        return pool_class(self.kb_repo, self.text_to_vec, self.settings.server.cached_num)
 
     def __repr__(self) -> str:
         return f"{self.kb_name} @ {self.embed_model}"
@@ -123,7 +131,7 @@ class KBService(ABC):
                     print(f"cannot convert absolute path ({source}) to relative path. error is : {e}")
 
             # self.delete_doc(kb_file)
-            doc_infos = self.do_add_doc(docs, **kwargs)
+            doc_infos = await self.do_add_doc(docs, **kwargs)
 
             status = await self.kb_file_repo.add_file_to_db(kb_file,
                                           custom_docs=custom_docs,
@@ -193,7 +201,7 @@ class KBService(ABC):
     def del_doc_by_ids(self, ids: List[str]) -> bool:
         raise NotImplementedError
 
-    def update_doc_by_ids(self, docs: Dict[str, Document]) -> bool:
+    async def update_doc_by_ids(self, docs: Dict[str, Document]) -> bool:
         """
         传入参数为： {doc_id: Document, ...}
         如果对应 doc_id 的值为 None，或其 page_content 为空，则删除该文档
@@ -206,7 +214,7 @@ class KBService(ABC):
                 continue
             ids.append(_id)
             pending_docs.append(doc)
-        self.do_add_doc(docs=pending_docs, ids=ids)
+        await self.do_add_doc(docs=pending_docs, ids=ids)
         return True
 
     async def list_docs(self, file_name: str = None, metadata: Dict = {}) -> List[DocumentWithVSId]:
@@ -288,7 +296,7 @@ class KBService(ABC):
         pass
 
     @abstractmethod
-    def do_add_doc(self,
+    async def do_add_doc(self,
                    docs: List[Document],
                    **kwargs,
                    ) -> List[Dict]:

@@ -30,6 +30,7 @@ dependencies = [
     "llama-index==0.10.55",
     "loguru==0.7.2",
     "markdownify==0.13.1",
+    "matplotlib>=3.10.6",
     "passlib==1.7.4",
     "psutil==6.0.0",
     "pydantic-settings>=2.10.1",

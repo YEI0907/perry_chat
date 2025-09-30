@@ -8,13 +8,13 @@ from tortoise import Tortoise
 
 from perry_chat.core.knowledge_base.kb_cache.faiss_cache import KBFaissPool, MemoFaissPool
 from perry_chat.core.config import load_settings
-from perry_chat.core.database import DataBase
+from perry_chat.core.database import DataBaseMannager
 from perry_chat.db.repository import KBRepository
 from perry_chat.core.text_to_vec import Text2Vector
 
 
 async def database_connect(settings):
-    await Tortoise.init(DataBase(settings).get_tortoise_config())  # , _create_db=True)
+    await Tortoise.init(DataBaseMannager(settings).get_tortoise_config())  # , _create_db=True)
     await Tortoise.generate_schemas()
 
 
@@ -42,7 +42,7 @@ async def worker(kb_faiss_pool: KBFaissPool, vs_name: str, name: str):
 
 async def main():
     settings = load_settings()
-    # database = DataBase(settings)
+    # database = DataBaseManager(settings)
     await database_connect(settings)
 
     kb_repo = KBRepository()

@@ -10,17 +10,82 @@ from langchain.text_splitter import TextSplitter
 from pathlib import Path
 import json
 from typing import List, Union, Dict, Tuple, Generator, Callable
-from perry_chat.core.config import load_settings
+from perry_chat.core.config import load_settings, Settings
 from loguru import logger
 
-settings = load_settings()
 
+# class FileUtils:
+#     def __init__(self, settings: Settings):
+#         self.settings = settings
+#
+#     def get_kb_path(self, knowledge_base_name: str):
+#         return os.path.join(self.settings.kb.kb_root_path, knowledge_base_name)
+#
+#     def get_doc_path(self, knowledge_base_name: str):
+#         return os.path.join(self.get_kb_path(knowledge_base_name), "content")
+#
+#     def get_vs_path(self, knowledge_base_name: str, vector_name: str):
+#         return os.path.join(self.get_kb_path(knowledge_base_name), "vector_store", vector_name)
+#
+#     @staticmethod
+#     def validate_kb_name(knowledge_base_id: str) -> bool:
+#         # 检查是否包含预期外的字符或路径攻击关键字
+#         if "../" in knowledge_base_id:
+#             return False
+#         return True
+#
+#     def get_file_path(self, knowledge_base_name: str, doc_name: str):
+#         doc_path = Path(self.get_doc_path(knowledge_base_name)).resolve()
+#         file_path = (doc_path / doc_name).resolve()
+#         if str(file_path).startswith(str(doc_path)):
+#             return str(file_path)
+#         else:
+#             raise ValueError(f"文件路径 {file_path} 不合法")
+#
+#     def list_kbs_from_folder(self):
+#         return [f for f in os.listdir(self.settings.kb.kb_root_path)
+#                 if os.path.isdir(os.path.join(self.settings.kb.kb_root_path, f))]
+#
+#     def list_files_from_folder(self, kb_name: str):
+#         doc_path = self.get_doc_path(kb_name)
+#         result = []
+#
+#         def is_skiped_path(path: str):
+#             tail = os.path.basename(path).lower()
+#             for x in ["temp", "tmp", ".", "~$"]:
+#                 if tail.startswith(x):
+#                     return True
+#             return False
+#
+#         def process_entry(entry):
+#             if is_skiped_path(entry.path):
+#                 return
+#
+#             if entry.is_symlink():
+#                 target_path = os.path.realpath(entry.path)
+#                 with os.scandir(target_path) as target_it:
+#                     for target_entry in target_it:
+#                         process_entry(target_entry)
+#             elif entry.is_file():
+#                 file_path = (Path(os.path.relpath(entry.path, doc_path)).as_posix())  # 路径统一为 posix 格式
+#                 result.append(file_path)
+#             elif entry.is_dir():
+#                 with os.scandir(entry.path) as it:
+#                     for sub_entry in it:
+#                         process_entry(sub_entry)
+#
+#         with os.scandir(doc_path) as it:
+#             for entry in it:
+#                 process_entry(entry)
+#
+#         return result
+
+settings = load_settings()
 def get_kb_path(knowledge_base_name: str):
     return os.path.join(settings.kb.kb_root_path, knowledge_base_name)
 
-def get_doc_path( knowledge_base_name: str):
+def get_doc_path(knowledge_base_name: str):
     return os.path.join(get_kb_path(knowledge_base_name), "content")
-
 
 def validate_kb_name(knowledge_base_id: str) -> bool:
     # 检查是否包含预期外的字符或路径攻击关键字
@@ -28,10 +93,8 @@ def validate_kb_name(knowledge_base_id: str) -> bool:
         return False
     return True
 
-
 def get_vs_path(knowledge_base_name: str, vector_name: str):
     return os.path.join(get_kb_path(knowledge_base_name), "vector_store", vector_name)
-
 
 def get_file_path(knowledge_base_name: str, doc_name: str):
     doc_path = Path(get_doc_path(knowledge_base_name)).resolve()
@@ -41,11 +104,9 @@ def get_file_path(knowledge_base_name: str, doc_name: str):
     else:
         raise ValueError(f"文件路径 {file_path} 不合法")
 
-
 def list_kbs_from_folder(kb_root_path: str):
     return [f for f in os.listdir(kb_root_path)
             if os.path.isdir(os.path.join(kb_root_path, f))]
-
 
 def list_files_from_folder(kb_name: str):
     doc_path = get_doc_path(kb_name)
