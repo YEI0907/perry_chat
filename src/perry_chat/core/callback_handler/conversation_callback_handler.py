@@ -1,19 +1,22 @@
 from typing import Any, Dict, List
+
+from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
 from langchain.schema import LLMResult
-from langchain.callbacks.base import BaseCallbackHandler
+
 from perry_chat.db.repository.message_repo import MassageRepository
 
 
-class ConversationCallbackHandler(BaseCallbackHandler):
+class ConversationCallbackHandler(AsyncCallbackHandler):
+    """一个将聊天进行持久化的回调函数"""
     raise_error: bool = True
 
     def __init__(self,
-         msg_repo: MassageRepository,
-         conversation_id: str,
-         message_id: str,
-         chat_type: str,
-         query: str
-    ):
+                 msg_repo: MassageRepository,
+                 conversation_id: str,
+                 message_id: str,
+                 chat_type: str,
+                 query: str
+                 ):
         self.msg_repo = msg_repo
         self.conversation_id = conversation_id
         self.message_id = message_id
@@ -26,7 +29,7 @@ class ConversationCallbackHandler(BaseCallbackHandler):
         """Whether to call verbose callbacks even if verbose is False."""
         return True
 
-    def on_llm_start(
+    async def on_llm_start(
             self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
         # 如果想存更多信息，则prompts 也需要持久化

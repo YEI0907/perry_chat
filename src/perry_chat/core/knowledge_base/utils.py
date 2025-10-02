@@ -1,18 +1,18 @@
-import os
 import importlib
+import json
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import List, Union, Dict, Tuple, Generator, Callable
 
 # from text_splitter import zh_title_enhance as func_zh_title_enhance
 import langchain.document_loaders
-from perry_chat.core.knowledge_base.text_splitter import zh_title_enhance as func_zh_title_enhance
 from langchain.docstore.document import Document
 from langchain.text_splitter import TextSplitter
-from pathlib import Path
-import json
-from typing import List, Union, Dict, Tuple, Generator, Callable
-from perry_chat.core.config import load_settings
 from loguru import logger
 
+from perry_chat.core.config import load_settings
+from perry_chat.core.knowledge_base.text_splitter import zh_title_enhance as func_zh_title_enhance
 
 # class FileUtils:
 #     def __init__(self, settings: Settings):
@@ -81,11 +81,15 @@ from loguru import logger
 #         return result
 
 settings = load_settings()
+
+
 def get_kb_path(knowledge_base_name: str):
     return os.path.join(settings.kb.kb_root_path, knowledge_base_name)
 
+
 def get_doc_path(knowledge_base_name: str):
     return os.path.join(get_kb_path(knowledge_base_name), "content")
+
 
 def validate_kb_name(knowledge_base_id: str) -> bool:
     # 检查是否包含预期外的字符或路径攻击关键字
@@ -93,8 +97,10 @@ def validate_kb_name(knowledge_base_id: str) -> bool:
         return False
     return True
 
+
 def get_vs_path(knowledge_base_name: str, vector_name: str):
     return os.path.join(get_kb_path(knowledge_base_name), "vector_store", vector_name)
+
 
 def get_file_path(knowledge_base_name: str, doc_name: str):
     doc_path = Path(get_doc_path(knowledge_base_name)).resolve()
@@ -104,9 +110,11 @@ def get_file_path(knowledge_base_name: str, doc_name: str):
     else:
         raise ValueError(f"文件路径 {file_path} 不合法")
 
+
 def list_kbs_from_folder(kb_root_path: str):
     return [f for f in os.listdir(kb_root_path)
             if os.path.isdir(os.path.join(kb_root_path, f))]
+
 
 def list_files_from_folder(kb_name: str):
     doc_path = get_doc_path(kb_name)
@@ -144,11 +152,11 @@ def list_files_from_folder(kb_name: str):
 
 
 LOADER_DICT = {
-               "UnstructuredMarkdownLoader": ['.md'],
-               "JSONLoader": [".json"],
-               "JSONLinesLoader": [".jsonl"],
-               "UnstructuredLightPipeline": [".pdf"],
-               }
+    "UnstructuredMarkdownLoader": ['.md'],
+    "JSONLoader": [".json"],
+    "JSONLinesLoader": [".jsonl"],
+    "UnstructuredLightPipeline": [".pdf"],
+}
 
 SUPPORTED_EXTS = [ext for sublist in LOADER_DICT.values() for ext in sublist]
 
@@ -165,13 +173,16 @@ if json.dumps is not _new_json_dumps:
 
 from langchain_community.document_loaders import JSONLoader
 
+
 class JSONLinesLoader(JSONLoader):
     """
     行式 Json 加载器，要求文件扩展名为 .jsonl
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._json_lines = True
+
 
 langchain.document_loaders.JSONLinesLoader = JSONLinesLoader
 
@@ -290,6 +301,7 @@ def make_text_splitter(
     # text_splitter._tokenizer.prefer_gpu()
     return text_splitter
 
+
 class KnowledgeFile:
     def __init__(
             self,
@@ -392,6 +404,7 @@ class KnowledgeFile:
 
     def get_size(self):
         return os.path.getsize(self.filepath)
+
 
 def run_in_thread_pool(
         func: Callable,

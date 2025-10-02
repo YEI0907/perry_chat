@@ -1,5 +1,7 @@
 from typing import List, Optional, Dict, Any, Tuple
+
 from tortoise.transactions import atomic
+
 from .base_repo import BaseRepository
 from ..models import KnowledgeBaseModel
 
@@ -10,13 +12,13 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
 
     @atomic()
     async def add_kb(
-        self,
-        kb_name: str,
-        kb_info: str,
-        vs_type: str,
-        embed_model: str,
-        api_endpoint: str,
-        user_id: Any
+            self,
+            kb_name: str,
+            kb_info: str,
+            vs_type: str,
+            embed_model: str,
+            api_endpoint: str,
+            user_id: Any
     ) -> bool:
         """
         创建或更新知识库。
@@ -87,8 +89,3 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
                 "create_time": kb.create_time,
             }
         return {}
-
-
-
-
-

@@ -4,7 +4,9 @@ from fastapi import FastAPI
 from loguru import logger
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
+
 from .config import Settings
+
 # --- 在这里定义你的数据库配置 ---
 
 # 数据库连接URL，建议从环境变量或配置文件中读取
@@ -16,13 +18,14 @@ from .config import Settings
 # 格式为: "app_name.models_filename"
 # 例如，如果你的模型在 "models/user_models.py", "models/item_models.py"
 # 你可以写成 ["models.user_models", "models.item_models"]
-MODELS = ["perry_chat.db.models"] # 假设你的所有模型都在一个名为 "models.py" 的文件中
+MODELS = ["perry_chat.db.models"]  # 假设你的所有模型都在一个名为 "models.py" 的文件中
 
 
 class DataBaseManager:
     """
     数据库管理类，用于初始化和关闭连接。
     """
+
     def __init__(self, settings: Settings):
         self.settings = settings
 
@@ -36,12 +39,12 @@ class DataBaseManager:
             },
             "apps": {
                 "models": {
-                    "models": MODELS + ["aerich.models"], # 添加 aerich.models 以支持迁移工具
+                    "models": MODELS + ["aerich.models"],  # 添加 aerich.models 以支持迁移工具
                     "default_connection": "default",
                 },
             },
             "use_tz": False,  # 建议设为 False，让时区管理更明确
-            "timezone": "Asia/Shanghai" # 根据需要设置时区
+            "timezone": "Asia/Shanghai"  # 根据需要设置时区
         }
         return config
 

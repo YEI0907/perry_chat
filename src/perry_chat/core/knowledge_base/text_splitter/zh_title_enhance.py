@@ -1,9 +1,9 @@
-from langchain.docstore.document import Document
 import re
+
+from langchain.docstore.document import Document
 
 
 def under_non_alpha_ratio(text: str, threshold: float = 0.5):
-
     """
     检查文本片段中非字母字符的比例是否超过给定阈值。这有助于防止像
     "-----------BREAK---------"

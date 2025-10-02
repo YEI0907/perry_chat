@@ -1,18 +1,17 @@
+from ..models import MessageModel
+from .base_repo import BaseRepository
 from typing import Dict, Optional, List
 
-from .base_repo import BaseRepository
-from ..models import MessageModel
 
 class MassageRepository(BaseRepository[MessageModel]):
     def __init__(self):
         super().__init__(MessageModel)
-    
-    
+
     async def update_message(self,
-            message_id: str,     
-            response: str = None,
-            metadata: Dict = None
-        ) -> Optional[str]:
+                             message_id: str,
+                             response: str = None,
+                             metadata: Dict = None
+                             ) -> Optional[str]:
         m: MessageModel = await self.get(message_id)
         if m is not None:
             if response is not None:

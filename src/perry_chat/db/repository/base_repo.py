@@ -1,4 +1,5 @@
 from typing import Generic, Type, TypeVar, List, Optional, Union
+
 from tortoise.models import Model
 
 # 使用泛型来定义模型的类型

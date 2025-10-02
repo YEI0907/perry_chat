@@ -1,7 +1,9 @@
 import asyncio
 import os
 import shutil
+from typing import List, Dict, Tuple
 
+from langchain.docstore.document import Document
 from langchain_community.vectorstores import FAISS
 from loguru import logger
 
@@ -10,9 +12,6 @@ from .base import KBService, SupportedVSType
 # from perry_chat.core.text_to_vec import Text2Vector
 from ..kb_cache.faiss_cache import ThreadSafeFaiss, KBFaissPool
 from ..utils import KnowledgeFile, get_kb_path, get_vs_path
-from langchain.docstore.document import Document
-from typing import List, Dict, Optional, Tuple
-
 from ...config import Settings
 
 
@@ -25,13 +24,13 @@ class FaissKBService(KBService[KBFaissPool]):
     vector_name: str = None  # 向量名称，默认为 None，可以在初始化时设置。
 
     def __init__(self,
-         knowledge_base_name: str,
-        embed_model: str,
-        kb_description: str,
-        settings: Settings,
-        kb_repo: KBRepository,
-        kb_file_repo: KnowledgeFileRepository,
-        file_doc_repo: FileDocRepository,):
+                 knowledge_base_name: str,
+                 embed_model: str,
+                 kb_description: str,
+                 settings: Settings,
+                 kb_repo: KBRepository,
+                 kb_file_repo: KnowledgeFileRepository,
+                 file_doc_repo: FileDocRepository, ):
         # kwargs.update({"pool_class": KBFaissPool})
         super().__init__(
             knowledge_base_name=knowledge_base_name,
@@ -67,8 +66,8 @@ class FaissKBService(KBService[KBFaissPool]):
         加载向量存储。
         """
         return await self.pool.load_vector_store(kb_name=self.kb_name,
-                                                     vector_name=self.vector_name,
-                                                     embed_model=self.embed_model)
+                                                 vector_name=self.vector_name,
+                                                 embed_model=self.embed_model)
 
     async def save_vector_store(self):
         """
@@ -120,7 +119,6 @@ class FaissKBService(KBService[KBFaissPool]):
             os.makedirs(self.vs_path)
         await self.load_vector_store()
 
-
     def do_drop_kb(self):
         """
         删除知识库，清除向量存储，并删除知识库路径。
@@ -156,13 +154,8 @@ class FaissKBService(KBService[KBFaissPool]):
 
         async with vector_store.async_acquire() as vs:
             vs: FAISS
-            docs = await asyncio.to_thread(
-                lambda: vs.similarity_search_with_score_by_vector(
-                    embeddings,
-                    k=top_k,
-                    score_threshold=score_threshold
-                )
-            )
+            # print(vs.distance_strategy)
+            docs = await vs.asimilarity_search_with_score_by_vector(embeddings, top_k)# , score_threshold=score_threshold)
         return docs
 
     async def do_add_doc(self,
@@ -254,6 +247,3 @@ class FaissKBService(KBService[KBFaissPool]):
             return "in_folder"
         else:
             return False
-
-
-

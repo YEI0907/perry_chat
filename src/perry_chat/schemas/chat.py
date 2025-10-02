@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
-from pydantic import BaseModel, Field
+
 from langchain.prompts.chat import ChatMessagePromptTemplate
+from pydantic import BaseModel, Field
 
 
 class History(BaseModel):
@@ -45,7 +46,6 @@ class History(BaseModel):
 
 
 class ChatRequest(BaseModel):
-
     query: str = Field(..., description="用户的输入")
     model_name: str = Field("qwen-flash", description="LLM 模型名称。")
 
@@ -69,5 +69,5 @@ class ChatRequest(BaseModel):
 class KBChatRequest(ChatRequest):
     knowledge_base_name: str = Field(..., description="知识库名称")
     top_k: int = Field(..., description="向量匹配数量")
-    score_threshold: float = Field(default=1, ge=0.0, le=2.0, description="知识库匹配相关度阈值，取值范围在0-1之间，SCORE越小，相关度越高，取到1相当于不筛选，建议设置在0.5左右")
-
+    score_threshold: float = Field(default=1, ge=0.0, le=2.0,
+                                   description="知识库匹配相关度阈值，取值范围在0-1之间，SCORE越小，相关度越高，取到1相当于不筛选，建议设置在0.5左右")

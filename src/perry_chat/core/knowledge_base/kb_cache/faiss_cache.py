@@ -1,12 +1,12 @@
 import asyncio
-import threading
+import os
 from typing import Union
 
-from loguru import logger
-from langchain_community.vectorstores import FAISS
-from langchain_community.docstore.in_memory import InMemoryDocstore
-import os
 from langchain.schema import Document
+from langchain_community.docstore.in_memory import InMemoryDocstore
+from langchain_community.vectorstores import FAISS, DistanceStrategy
+from loguru import logger
+
 from perry_chat.core.knowledge_base.utils import get_vs_path
 from .base import ThreadSafeObject, CachePool
 
@@ -20,6 +20,8 @@ def _new_ds_search(self, search: str) -> Union[str, Document]:
         if isinstance(doc, Document):
             doc.metadata["id"] = search
         return doc
+
+
 InMemoryDocstore.search = _new_ds_search
 
 
@@ -27,6 +29,7 @@ class ThreadSafeFaiss(ThreadSafeObject[FAISS]):
     """
     线程安全的 FAISS 类，用于管理和操作 FAISS 向量存储。
     """
+
     def __repr__(self) -> str:
         cls = type(self).__name__
         return f"<{cls}: key: {self.key}, obj: {self._obj}, docs_count: {self.docs_count()}>"
@@ -110,9 +113,10 @@ class _FaissPool(CachePool[ThreadSafeFaiss]):
     """
     FAISS 池，用于管理 FAISS 向量存储的创建、保存和卸载。
     """
+
     def new_vector_store(
-        self,
-        embed_model: str = None
+            self,
+            embed_model: str = None
     ) -> FAISS:
         """
         创建一个新的 FAISS 向量存储。
@@ -125,12 +129,15 @@ class _FaissPool(CachePool[ThreadSafeFaiss]):
         """
         embeddings = self.text2vec.get_embedding(embed_model)
         doc = Document(page_content="init", metadata={})
-        vector_store = FAISS.from_documents([doc], embeddings, distance_strategy="METRIC_INNER_PRODUCT")
+        vector_store = FAISS.from_documents(
+            [doc],
+            embeddings,
+            distance_strategy=DistanceStrategy.MAX_INNER_PRODUCT)
         ids = list(vector_store.docstore._dict.keys())
         vector_store.delete(ids)
         return vector_store
 
-    def save_vector_store(self, kb_name: str, path: str=None):
+    def save_vector_store(self, kb_name: str, path: str = None):
         """
         保存指定知识库的向量存储。
 
@@ -145,7 +152,7 @@ class _FaissPool(CachePool[ThreadSafeFaiss]):
             return cache.save(path)
         return None
 
-    async def async_save_vector_store(self, kb_name: str, path: str=None):
+    async def async_save_vector_store(self, kb_name: str, path: str = None):
         """
         异步保存指定知识库的向量存储。
 
@@ -176,6 +183,7 @@ class KBFaissPool(_FaissPool):
     """
     知识库 FAISS 池，用于管理知识库的 FAISS 向量存储。
     """
+
     async def load_vector_store(
             self,
             kb_name: str,
@@ -199,7 +207,7 @@ class KBFaissPool(_FaissPool):
         async with self.async_atomic:
             vector_name = vector_name or embed_model
             # 使用 asyncio.to_thread 避免阻塞
-            cache = await asyncio.to_thread(self.get, (kb_name, vector_name)) # 用元组比拼接字符串好一些
+            cache = await asyncio.to_thread(self.get, (kb_name, vector_name))  # 用元组比拼接字符串好一些
             if cache is None:
                 item = ThreadSafeFaiss((kb_name, vector_name), pool=self)
                 self.set((kb_name, vector_name), item)
@@ -212,9 +220,9 @@ class KBFaissPool(_FaissPool):
                     # 用于快速最近邻搜索。它是一个二进制文件，因为FAISS索引无法通过标准的pickle序列化。
                     if os.path.isfile(os.path.join(vs_path, "index.faiss")):
 
-                    # index.pkl：这个文件通常包含了与向量相关的元数据（如文档存储 docstore 和索引到文档存储ID的映射 index_to_docstore_id）。
-                    # 这些数据可以通过pickle进行序列化和反序列化。
-                    # docstore 存储了实际的文本或文档，而 index_to_docstore_id 维护了FAISS索引中向量与这些文档或文本之间的映射关系。
+                        # index.pkl：这个文件通常包含了与向量相关的元数据（如文档存储 docstore 和索引到文档存储ID的映射 index_to_docstore_id）。
+                        # 这些数据可以通过pickle进行序列化和反序列化。
+                        # docstore 存储了实际的文本或文档，而 index_to_docstore_id 维护了FAISS索引中向量与这些文档或文本之间的映射关系。
                         # 这里要加载Embedding 模型
                         embeddings = await self.load_kb_embeddings(kb_name=kb_name, default_embed_model=embed_model)
 
@@ -222,9 +230,13 @@ class KBFaissPool(_FaissPool):
                         # load_local 方法会检查本地是否存在指定的文件，如果存在，它会将这些文件加载到内存中，并返回一个加载好的 FAISS 实例
                         # 使用 asyncio.to_thread 避免阻塞异步事件循环
                         vector_store = await asyncio.to_thread(
-                            FAISS.load_local, vs_path, embeddings, 
-                            distance_strategy="METRIC_INNER_PRODUCT", 
-                            allow_dangerous_deserialization=True
+                            FAISS.load_local,
+                            vs_path,
+                            embeddings,
+                            **{
+                                "distance_strategy" : DistanceStrategy.MAX_INNER_PRODUCT,
+                                "allow_dangerous_deserialization" : True
+                            }
                         )
                     elif create:
                         # create an empty vector store
@@ -246,11 +258,12 @@ class MemoFaissPool(_FaissPool):
     """
     内存 FAISS 池，用于管理内存中的 FAISS 向量存储。
     """
+
     def load_vector_store(
-        self,
-        kb_name: str,
-        embed_model: str = None,
-    ) -> ThreadSafeFaiss|None:
+            self,
+            kb_name: str,
+            embed_model: str = None,
+    ) -> ThreadSafeFaiss | None:
         """
         加载或创建内存中的 FAISS 向量存储。
 

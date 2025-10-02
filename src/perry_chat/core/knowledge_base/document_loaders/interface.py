@@ -1,7 +1,7 @@
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any
 from typing import List
-import warnings
 
 from perry_chat.core.config import Settings
 

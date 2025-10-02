@@ -1,5 +1,6 @@
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
+
 
 class KnowledgeFileModel(Model):
     """
@@ -21,5 +22,3 @@ class KnowledgeFileModel(Model):
     class Meta:
         table = "knowledge_files"
         table_description = "知识库文件模型"
-
-

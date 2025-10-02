@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 class EnvManager(BaseModel):

@@ -1,7 +1,8 @@
+import logging
 import re
 from typing import List, Optional, Any
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class ChineseRecursiveTextSplitter(RecursiveCharacterTextSplitter):
         if _good_splits:
             merged_text = self._merge_splits(_good_splits, _separator)
             final_chunks.extend(merged_text)
-        return [re.sub(r"\n{2,}", "\n", chunk.strip()) for chunk in final_chunks if chunk.strip()!=""]
+        return [re.sub(r"\n{2,}", "\n", chunk.strip()) for chunk in final_chunks if chunk.strip() != ""]
 
 
 if __name__ == "__main__":
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         疫苗供应不足，制造业“缺芯”、物流受限、 运价高企，全球产业链供应链面临压力。 全球通胀持续高位运行。能源价格上涨加大主要经济体 的通胀压力，
         增加全球经济复苏的不确定性。世界银行今年 10 月发布《大宗商品市场展望》指出，能源价格在 2021 年 大涨逾 80%，并且仍将在 2022 年小幅上涨。
         IMF 指出，全 球通胀上行风险加剧，通胀前景存在巨大不确定性。""",
-        ]
+    ]
     # text = """"""
     for inum, text in enumerate(ls):
         print("========")

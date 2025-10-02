@@ -8,41 +8,40 @@ from langchain.chains.llm import LLMChain
 from langchain_core.prompts import PromptTemplate
 from sse_starlette import EventSourceResponse
 
-from perry_chat.core.llm import LLM
 from perry_chat.core.callback_handler.conversation_callback_handler import ConversationCallbackHandler
+from perry_chat.core.config import Settings
+from perry_chat.core.llm import LLM
 from perry_chat.core.memory.conversation_db_buffer_mem import ConversationBufferDBMemory
 from perry_chat.core.utils import wrap_done
 from perry_chat.db.repository.conversation_repo import ConversationRepository
 from perry_chat.db.repository.message_repo import MassageRepository
 from perry_chat.db.repository.user_repo import UserRepository
-from perry_chat.schemas.chat import ChatRequest
-from perry_chat.core.config import Settings
-
+from perry_chat.schemas.chat import ChatRequest, KBChatRequest
 
 
 class ChatService:
 
     def __init__(self,
-             user_repository: UserRepository,
-             massage_repository: MassageRepository,
-                conversation_repository: ConversationRepository,
+                 user_repository: UserRepository,
+                 massage_repository: MassageRepository,
+                 conversation_repository: ConversationRepository,
                  settings: Settings
-         ):
+                 ):
         self.user_repository = user_repository
         self.massage_repository = massage_repository
         self.conversation_repository = conversation_repository
         self.settings = settings
 
     async def add_message_to_db(self,
-        user_id: str,
-        conversation_id: str,
-        conversation_name: str,
-        prompt_name: str,
-        query: str,
-        response="",
-        metadata: Dict = {},
-        message_id: str=None,
-    ) -> str:
+                                user_id: str,
+                                conversation_id: str,
+                                conversation_name: str,
+                                prompt_name: str,
+                                query: str,
+                                response="",
+                                metadata: Dict = {},
+                                message_id: str = None,
+                                ) -> str:
         """
         :param message_id:
         :param metadata:
@@ -57,11 +56,10 @@ class ChatService:
         conversation = await self.conversation_repository.get(conversation_id)
 
         if not conversation:
-
             conversation = await self.conversation_repository.create(
-                id = conversation_id,
-                user_id = user_id,
-                name = conversation_name,
+                id=conversation_id,
+                user_id=user_id,
+                name=conversation_name,
                 chat_type=prompt_name
             )
 
@@ -70,38 +68,39 @@ class ChatService:
             message_id = str(uuid.uuid4())
 
         m = await self.massage_repository.create(
-            id = message_id,
-            conversation_id = conversation.id,
-            chat_type = prompt_name,
-            response = response,
-            metadata = metadata,
-            query = query
+            id=message_id,
+            conversation_id=conversation.id,
+            chat_type=prompt_name,
+            response=response,
+            metadata=metadata,
+            query=query
         )
         return m.id
-
 
     async def check_user(self, user_id: str):
         if not await self.user_repository.check_user(user_id):
             raise ValueError(f"user not found")
 
-
     async def chat(self, request: ChatRequest):
+        # 先检查用户是否存在
         await self.check_user(request.user_id)
 
+        # 流式聊天
         async def chat_iterator() -> AsyncIterable[str]:
 
+            # 异步生成器的回调函数
             callback = AsyncIteratorCallbackHandler()
             callbacks = [callback]
             memory = None
 
-
             # 构造一个新的Message_ID记录
-            message_id = await self.add_message_to_db(user_id=request.user_id,
-                                                      conversation_id=request.conversation_id,
-                                                      conversation_name=request.conversation_name,
-                                                      prompt_name=request.prompt_name,
-                                                      query=request.query
-                                                      )
+            message_id = await self.add_message_to_db(
+                user_id=request.user_id,
+                conversation_id=request.conversation_id,
+                conversation_name=request.conversation_name,
+                prompt_name=request.prompt_name,
+                query=request.query
+            )
 
             conversation_callback = ConversationCallbackHandler(
                 msg_repo=self.massage_repository,
@@ -116,7 +115,6 @@ class ChatService:
             # 如果 max_tokens 是一个不合理的值（即小于或等于0），代码将其设置为 None，以防止后续操作中的错误或异常。
             if isinstance(request.max_tokens, int) and request.max_tokens <= 0:
                 max_tokens = None
-
 
             model = LLM.get_chat_openai(
                 model_name=request.model_name,
@@ -140,8 +138,6 @@ class ChatService:
                 )
             else:
                 pass
-
-
 
             chat_prompt = PromptTemplate.from_template(prompt)
             chain = LLMChain(prompt=chat_prompt, llm=model, memory=memory)
@@ -170,4 +166,9 @@ class ChatService:
 
         return EventSourceResponse(chat_iterator())
 
-    async def knowledge_base_chat(self, request: ChatRequest):
+    async def knowledge_base_chat(self, request: KBChatRequest):
+        # 检查用户存不存在
+
+        # 获取知识库
+
+        ...

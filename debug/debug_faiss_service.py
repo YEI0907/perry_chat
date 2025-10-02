@@ -1,6 +1,6 @@
 from perry_chat.core.database_manager import DataBaseManager
 from perry_chat.core.config import load_settings
-from perry_chat.core.knowledge_base.kb_services.faiss_kb_service import FaissKBService
+from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissKBService
 from perry_chat.core.knowledge_base.utils import KnowledgeFile
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
 
@@ -25,8 +25,8 @@ async def main():
     )
     print(f"faiss_kb_service: {faiss_service}")
 
-    from perry_chat.core.knowledge_base.kb_services import KBServiceFactory
-    kb = await KBServiceFactory.get_service_by_name("test")
+    from perry_chat.core.knowledge_base.vector_database_services import VecDBServiceFactory
+    kb = await VecDBServiceFactory.get_service_by_name("test")
 
     # 如果想要使用的向量数据库的collecting name 不存在，则进行创建
     if kb is None:

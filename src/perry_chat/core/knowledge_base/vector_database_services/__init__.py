@@ -1,11 +1,13 @@
 from typing import Union, Any
-from .base import SupportedVSType, KBService
+
 from perry_chat.core.config import load_settings
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
+from .base import SupportedVSType, KBService
 
-class KBServiceFactory:
+
+class VecDBServiceFactory:
     """
-    KBServiceFactory 是一个工厂类，提供根据指定的向量存储类型获取不同知识库服务的方法。
+    VecDBServiceFactory 是一个工厂类，提供根据指定的向量存储类型获取不同知识库服务的方法。
     """
 
     @staticmethod
@@ -45,7 +47,7 @@ class KBServiceFactory:
             )
         elif SupportedVSType.MILVUS == vector_store_type:
             from .milvus_kb_service import MilvusKBService
-            return MilvusKBService(kb_name,embed_model=embed_model)
+            return MilvusKBService(kb_name, embed_model=embed_model)
         elif SupportedVSType.ZILLIZ == vector_store_type:
             from .zilliz_kb_service import ZillizKBService
             return ZillizKBService(kb_name, embed_model=embed_model)
@@ -59,9 +61,8 @@ class KBServiceFactory:
         else:
             raise ValueError(f"Unsupported vector store type: {vector_store_type}")
 
-
     @staticmethod
-    async def get_service_by_name(kb_name: str) -> KBService|None:
+    async def get_service_by_name(kb_name: str) -> KBService | None:
         """
         根据知识库名称获取知识库服务。
 
@@ -76,8 +77,8 @@ class KBServiceFactory:
         kb_name, vs_type, embed_model, description = await repo.load_kb(kb_name)
         if kb_name is None:  # kb not in db, just return None
             return None
-        return KBServiceFactory.get_service(kb_name, vs_type, embed_model, description)
+        return VecDBServiceFactory.get_service(kb_name, vs_type, embed_model, description)
 
     @staticmethod
     def get_default():
-        return KBServiceFactory.get_service("default", SupportedVSType.DEFAULT)
+        return VecDBServiceFactory.get_service("default", SupportedVSType.DEFAULT)

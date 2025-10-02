@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-'''
+"""
 @File       : config_loader.py
 @CreateTime : 2025/08/22 17:15:00
 @Author     : Penglin.Ye
 @Desc       : 配置文件加载工具
-'''
+"""
 
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union
 
 import yaml
 from pydantic import BaseModel

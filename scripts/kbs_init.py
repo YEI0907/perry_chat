@@ -5,8 +5,8 @@ import os
 from pathlib import Path
 import asyncio
 
-from perry_chat.core.knowledge_base.kb_services import KBServiceFactory
-from perry_chat.core.knowledge_base.kb_services.faiss_kb_service import FaissKBService
+from perry_chat.core.knowledge_base.vector_database_services import VecDBServiceFactory
+from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissKBService
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
 from perry_chat.core.knowledge_base.utils import KnowledgeFile
 from perry_chat.core.config import load_settings
@@ -24,7 +24,7 @@ API_ENDPOINT = settings.model.embed_models[EMBED_MODEL].api_base_url
 
 async def process_and_add_document(file_path, faiss_service):
 
-    kb = await KBServiceFactory.get_service_by_name("private")
+    kb = await VecDBServiceFactory.get_service_by_name("private")
 
     # 如果想要使用的向量数据库的collecting name 不存在，则进行创建
     if kb is None:
@@ -112,7 +112,7 @@ async def wiki_main():
         file_doc_repo = file_doc_repo
     )
 
-    kb = await KBServiceFactory.get_service_by_name("wiki")
+    kb = await VecDBServiceFactory.get_service_by_name("wiki")
 
     # 如果想要使用的向量数据库的collecting name 不存在，则进行创建
     if kb is None:
@@ -141,10 +141,11 @@ async def sequential_execution():
     # print("处理pdf")
     # await main()
     print("处理wiki")
-    await wiki_main()
+    # await wiki_main()
 
 
 async def test_query():
+    await DataBaseManager(settings).init_connect()
     faissService = FaissKBService(
         "private",
             embed_model = EMBED_MODEL,
@@ -159,6 +160,6 @@ async def test_query():
 
 if __name__ == '__main__':
     ##数据入库
-    asyncio.run(sequential_execution())
+    # asyncio.run(sequential_execution())
     # 测试
     asyncio.run(test_query())

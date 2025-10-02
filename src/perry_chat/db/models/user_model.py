@@ -1,5 +1,6 @@
 from tortoise import models, fields
 
+
 class UserModel(models.Model):
     """
     用户模型

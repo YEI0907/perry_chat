@@ -42,6 +42,7 @@ class Settings(BaseModel):
     # 环境变量
     config_path: str = Field(default="", description="配置文件目录路径")
     resources_path: str = Field(default="", description="资源文件目录路径")
+
     # llm_api_key: str = Field(default="", description="大模型APIKEY")
 
     def __init__(self, **data):
@@ -88,7 +89,6 @@ class Settings(BaseModel):
 
         # 返回新实例
         return self.load()
-
 
 # 全局配置实例
 # settings = Settings.load()

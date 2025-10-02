@@ -19,10 +19,10 @@ class MessageModel(models.Model):
     # update_time = fields.DatetimeField(auto_now=True)
 
     conversation: fields.ForeignKeyRelation[ConversationModel] = fields.ForeignKeyField(
-        "models.ConversationModel",     # 1. 关联的模型名称 (推荐使用字符串格式)
-        related_name="messages",        # 2. 在 ConversationModel 中的反向关系名称
-        to_field="id",                  # 3. 指定关联到 ConversationModel 的哪个字段
-        on_delete=fields.CASCADE        # 4. 当会话被删除时，级联删除所有消息
+        "models.ConversationModel",  # 1. 关联的模型名称 (推荐使用字符串格式)
+        related_name="messages",  # 2. 在 ConversationModel 中的反向关系名称
+        to_field="id",  # 3. 指定关联到 ConversationModel 的哪个字段
+        on_delete=fields.CASCADE  # 4. 当会话被删除时，级联删除所有消息
     )
 
     class Meta:

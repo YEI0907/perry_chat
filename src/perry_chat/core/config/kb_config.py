@@ -7,11 +7,13 @@
 @Desc       : 知识库配置    
 '''
 import os
-from typing import Any, List, Literal, Tuple, Union, Dict
-from loguru import logger
-from pydantic import BaseModel, Field, model_validator
 from abc import ABC
 from pathlib import Path
+from typing import List, Literal, Tuple, Union, Dict
+
+from loguru import logger
+from pydantic import BaseModel, Field, model_validator
+
 
 class KBInfo(BaseModel):
     """每个知识库的初始化介绍, 用于在初始化知识库时显示和Agent调用, 没写则没有介绍, 不会被Agent调用。"""
@@ -24,8 +26,10 @@ class KBInfo(BaseModel):
         description="知识库介绍"
     )
 
+
 class VectorDatabaseConfig(ABC, BaseModel):
     pass
+
 
 class FaissConfig(VectorDatabaseConfig):
     type: Literal["faiss"] = "faiss"
@@ -38,6 +42,7 @@ class FaissConfig(VectorDatabaseConfig):
         description="缓存临时向量库数量, 用于文件对话"
     )
 
+
 class MilvusKwargs(BaseModel):
     search_params: dict = Field(
         default={},
@@ -47,6 +52,7 @@ class MilvusKwargs(BaseModel):
         default={},
         description="索引参数"
     )
+
 
 class MilvusConfig(VectorDatabaseConfig):
     type: Literal["milvus"] = "milvus"
@@ -75,6 +81,7 @@ class MilvusConfig(VectorDatabaseConfig):
         description="Milvus数据库的额外参数"
     )
 
+
 class ZillizConfig(VectorDatabaseConfig):
     type: Literal["zilliz"] = "zilliz"
     host: str = Field(
@@ -97,7 +104,8 @@ class ZillizConfig(VectorDatabaseConfig):
         default=False,
         description="是否启用安全连接"
     )
-    
+
+
 class PGConfig(VectorDatabaseConfig):
     type: Literal["pg"] = "pg"
     host: str = Field(
@@ -121,9 +129,11 @@ class PGConfig(VectorDatabaseConfig):
         description="PostgreSQL数据库的数据库名"
     )
 
+
 class TextSplitterConfig(ABC, BaseModel):
     """文本切分器的基础配置类"""
     pass
+
 
 class ChineseRecursiveConfig(TextSplitterConfig):
     """
@@ -139,6 +149,7 @@ class ChineseRecursiveConfig(TextSplitterConfig):
         description="tokenizer的名称或路径"
     )
 
+
 class SpacyConfig(TextSplitterConfig):
     """
     Spacy切分器配置
@@ -153,6 +164,7 @@ class SpacyConfig(TextSplitterConfig):
         description="tokenizer的名称或路径"
     )
 
+
 class RecursiveCharacterConfig(TextSplitterConfig):
     """
     递归字符切分器配置
@@ -166,6 +178,7 @@ class RecursiveCharacterConfig(TextSplitterConfig):
         default="cl100k_base",
         description="tokenizer的名称或路径"
     )
+
 
 class MarkdownHeaderConfig(TextSplitterConfig):
     """
@@ -183,6 +196,7 @@ class MarkdownHeaderConfig(TextSplitterConfig):
         description="Markdown标题切分规则"
     )
 
+
 # 联合类型，用于类型提示
 AllTextSplitterConfigs = Union[
     ChineseRecursiveConfig,
@@ -193,9 +207,10 @@ AllTextSplitterConfigs = Union[
 
 AllVectorStoreConfigs = Union[FaissConfig, MilvusConfig, ZillizConfig, PGConfig]
 
+
 class KBConfig(BaseModel):
     """知识库的配置类, 包含sql数据库以及向量数据库"""
-    KB_TYPES: list[str] =  ["faiss", "milvus", "zilliz", "pg"]
+    KB_TYPES: list[str] = ["faiss", "milvus", "zilliz", "pg"]
 
     # sql数据库设置
     database_type: str = Field(
@@ -228,23 +243,23 @@ class KBConfig(BaseModel):
         然后将文本与往上一级的标题进行拼合，实现文本信息的增强。
         """
     )
-    
+
     # 向量数据库
     default_knowledge_base: str = Field(
         default="",
         description="默认使用的知识库"
     )
-    
+
     vector_search_top_k: int = Field(
         default=3,
         description="向量搜索时返回的最相关文档数量"
     )
-    
+
     score_threshold: float = Field(
         default=1.0,
         description="向量搜索时的分数阈值"
     )
-    
+
     chunk_size: int = Field(
         default=500,
         description="每个文本块的大小, 不适用MarkdownHeaderTextSplitter"
@@ -253,17 +268,17 @@ class KBConfig(BaseModel):
         default=50,
         description="文本块之间的重叠大小, 不适用MarkdownHeaderTextSplitter"
     )
-    
+
     kb_root_path: str = Field(
         default=None,
         description="知识库根目录的路径"
     )
-    
+
     # 向量数据库配置
     # Pydantic 会根据输入数据中 'type' 字段的值，自动选择 AllVectorStoreConfigs 中的一个进行解析
     vector_store: AllVectorStoreConfigs = Field(
-        default=FaissConfig(type="faiss"), 
-        discriminator='type', 
+        default=FaissConfig(type="faiss"),
+        discriminator='type',
         description="向量数据库的配置"
     )
 
@@ -276,7 +291,7 @@ class KBConfig(BaseModel):
         default="ChineseRecursiveTextSplitter",
         description="文本切分器的名称"
     )
-    
+
     text_splitters: Dict[
         Literal[
             "ChineseRecursiveTextSplitter",
@@ -294,12 +309,12 @@ class KBConfig(BaseModel):
         },
         description="文本切分器的配置"
     )
-    
+
     embedding_kword_file: str = Field(
         default="embedding_keywords.txt",
         description="Embedding模型定制词语的词表文件"
     )
-    
+
     kb_info: KBInfo = Field(
         default=lambda: KBInfo(),
         description="每个知识库的初始化介绍, 用于在初始化知识库时显示和Agent调用,没写则没有介绍,不会被Agent调用。"
@@ -308,7 +323,7 @@ class KBConfig(BaseModel):
     @property
     def database_url(self):
         return f"{self.database_type}://{self.username}:{self.password}@{self.host}:{self.port}/perry_chat"
-    
+
     @model_validator(mode='after')
     def validate_and_process_paths(self) -> 'KBConfig':
         """

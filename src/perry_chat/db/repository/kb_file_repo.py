@@ -1,11 +1,11 @@
+from typing import List, Dict
+
 from loguru import logger
 from tortoise.transactions import atomic
 
 from .base_repo import BaseRepository
 from .file_doc_repo import FileDocRepository
 from ..models import KnowledgeFileModel, KnowledgeBaseModel
-from typing import List, Dict
-
 from ...core.knowledge_base.utils import KnowledgeFile
 
 
@@ -176,7 +176,6 @@ class KnowledgeFileRepository(BaseRepository[KnowledgeFileModel]):
         ).exists()
         return flag if flag else False
 
-
     async def get_file_detail(self, kb_name: str, filename: str) -> dict:
         file: KnowledgeFileModel = await self.model.filter(
             kb_name__iexact=kb_name,
@@ -199,4 +198,3 @@ class KnowledgeFileRepository(BaseRepository[KnowledgeFileModel]):
             }
         else:
             return {}
-

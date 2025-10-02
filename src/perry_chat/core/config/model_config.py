@@ -6,11 +6,11 @@
 @Author     : Penglin.Ye
 @Desc       : 模型配置文件
 '''
-import os
-from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
-from pydantic import BaseModel, Field, model_validator
+from typing import Dict, List, Optional
+
 from loguru import logger
+from pydantic import BaseModel, Field, model_validator
+
 
 class LLMAPI(BaseModel):
     """大模型API配置"""
@@ -18,6 +18,7 @@ class LLMAPI(BaseModel):
     models: List[str] = Field(..., description="支持的模型列表")
     api_key: Optional[str] = Field(default=None, description="API密钥")
     api_base_url: str = Field(default="https://api.openai.com/v1", description="API基础URL")
+
 
 class EmbedAPI(BaseModel):
     name: str = Field(..., description="API名称")
@@ -51,7 +52,7 @@ class ModelConfig(BaseModel):
         default_factory=dict,
         description="大模型名称-API配置映射"
     )
-    
+
     @model_validator(mode="after")
     def load_llm_models(self) -> "ModelConfig":
         """
@@ -74,7 +75,7 @@ class ModelConfig(BaseModel):
                     self.embed_models[model] = embed_api
 
         return self
-        
+
     # @model_validator(mode='after')
     # def validate_and_process_paths(self) -> 'ModelConfig':
     #     """
@@ -82,7 +83,6 @@ class ModelConfig(BaseModel):
     #     加载模型列表
     #     """
 
-        
     #     # 验证选用的Embedding模型名称是否存在
     #     embedding_models = {embed_model.name for embed_model in self.local_model_config.embed}
     #     if self.embedding_model_name and self.embedding_model_name not in embedding_models:
@@ -90,8 +90,5 @@ class ModelConfig(BaseModel):
     #             f"Embedding model '{self.embedding_model_name}' is not available. "
     #             f"Available embedding models are: {sorted(embedding_models)}"
     #         )
-        
+
     #     return self
-        
-        
-        

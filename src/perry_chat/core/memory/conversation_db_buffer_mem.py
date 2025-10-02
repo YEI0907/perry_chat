@@ -1,26 +1,20 @@
-import logging
-from typing import Any, List, Dict
+from abc import ABC
+from typing import Any, Dict, Optional, Tuple
+from typing import List
 
 # from langchain.memory.chat_memory import BaseChatMemory
 from langchain.schema import get_buffer_string, BaseMessage, HumanMessage, AIMessage
 from langchain.schema.language_model import BaseLanguageModel
-# from server.db.repository.message_repository import filter_message
-# from server.db.models.message_model import MessageModel
-
-
-
-
-from abc import ABC
-from typing import Any, Dict, Optional, Tuple
-
 from langchain_community.chat_message_histories.in_memory import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.memory import BaseMemory
 from langchain_core.pydantic_v1 import Field
 
-from langchain.memory.utils import get_prompt_input_key
-
 from perry_chat.db.repository.message_repo import MassageRepository
+
+
+# from server.db.repository.message_repository import filter_message
+# from server.db.models.message_model import MessageModel
 
 
 class BaseChatMemory(BaseMemory, ABC):
@@ -32,7 +26,7 @@ class BaseChatMemory(BaseMemory, ABC):
     return_messages: bool = False
 
     def _get_input_output(
-        self, inputs: Dict[str, Any], outputs: Dict[str, str]
+            self, inputs: Dict[str, Any], outputs: Dict[str, str]
     ) -> Tuple[str, str]:
         if self.input_key is None:
             # 重写
@@ -99,7 +93,6 @@ class ConversationBufferDBMemory(BaseChatMemory):
 
         return chat_messages
 
-
     def memory_variables(self) -> List[str]:
         """Will always return list of memory variables.
 
@@ -107,7 +100,6 @@ class ConversationBufferDBMemory(BaseChatMemory):
         """
         print("现在开始加载memory_variables了")
         return [self.memory_key]
-
 
     def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """Return key-value pairs given the text input to the chain."""

@@ -1,6 +1,7 @@
-import logging
 import asyncio
+import logging
 from typing import Awaitable
+
 from .config import settings
 
 
@@ -15,7 +16,7 @@ async def wrap_done(fn: Awaitable, event: asyncio.Event):
         logging.exception(e)
         msg = f"Caught exception: {e}"
         settings.logger.error(f'{e.__class__.__name__}: {msg}',
-                     exc_info=e if log_verbose else None)
+                              exc_info=e if log_verbose else None)
     finally:
         # Signal the aiter to stop.
         event.set()

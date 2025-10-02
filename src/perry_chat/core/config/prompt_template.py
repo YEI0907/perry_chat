@@ -6,16 +6,13 @@
 @Author     : Penglin.Ye
 @Desc       : 提示词配置
 '''
-from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
-from pydantic import BaseModel, Field, model_validator
-from loguru import logger
+from pydantic import BaseModel, Field
 
 
 class LLMChatPrompt(BaseModel):
     """LLM聊天提示词配置"""
     default: str = Field(
-        default='{{ input }}', 
+        default='{{ input }}',
         description="默认提示内容"
     )
     with_history: str = Field(
@@ -33,26 +30,28 @@ class LLMChatPrompt(BaseModel):
                 '{input}\n',
         description="带历史记录的提示内容"
     )
-    
+
+
 class KnowledgeBaseChat(BaseModel):
     default: str = Field(
         default='<指令>根据已知信息，简洁和专业的来回答问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题”，'
-            '不允许在答案中添加编造成分，答案请使用中文。 </指令>\n'
-            '<已知信息>{{ context }}</已知信息>\n'
-            '<问题>{{ question }}</问题>\n',
+                '不允许在答案中添加编造成分，答案请使用中文。 </指令>\n'
+                '<已知信息>{{ context }}</已知信息>\n'
+                '<问题>{{ question }}</问题>\n',
         description="默认带上下文的提示内容提示内容"
     )
     text: str = Field(
         default='<指令>根据已知信息，简洁和专业的来回答问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题”，答案请使用中文。 </指令>\n'
-            '<已知信息>{{ context }}</已知信息>\n'
-            '<问题>{{ question }}</问题>\n',
+                '<已知信息>{{ context }}</已知信息>\n'
+                '<问题>{{ question }}</问题>\n',
         description="带上下文的提示内容",
     )
     empty: str = Field(
         default='请你回答我的问题:\n'
-            '{{ question }}\n\n',
-            description="没有搜索到上下文时候的提示词"
+                '{{ question }}\n\n',
+        description="没有搜索到上下文时候的提示词"
     )
+
 
 class PromptTemplates(BaseModel):
     """提示词模板配置"""

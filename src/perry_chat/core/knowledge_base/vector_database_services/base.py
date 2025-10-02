@@ -1,16 +1,19 @@
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Dict, Tuple, Any, Coroutine, Union, Type
+from typing import Generic, TypeVar
+from typing import List, Dict, Tuple, Type
+
 from langchain_core.documents import Document
 from loguru import logger
-from typing import Generic, TypeVar
-from perry_chat.core.config import settings, Settings
-from ..kb_cache.base import CachePool
-from perry_chat.core.knowledge_base.kb_services.schemas import DocumentWithVSId
+
+from perry_chat.core.config import Settings
+from perry_chat.core.knowledge_base.schemas import DocumentWithVSId
 from perry_chat.core.knowledge_base.utils import get_kb_path, get_doc_path, KnowledgeFile
 from perry_chat.core.text_to_vec import Text2Vector, DocEmbedResult
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
+from ..kb_cache.base import CachePool
+
 
 class SupportedVSType:
     """受支持的向量数据库"""
@@ -20,20 +23,23 @@ class SupportedVSType:
     ZILLIZ = 'zilliz'
     CHROMADB = 'chromadb'
 
+
 CACHE_POOL = TypeVar('CACHE_POOL', bound=CachePool)
+
 
 class KBService(ABC, Generic[CACHE_POOL]):
     """向量数据库基类"""
+
     def __init__(self,
-        knowledge_base_name: str,
-        embed_model: str,
-        kb_description: str,
-        settings: Settings,
-        kb_repo: KBRepository,
-        kb_file_repo: KnowledgeFileRepository,
-        file_doc_repo: FileDocRepository,
-        pool_class: Type[CACHE_POOL]
-    ):
+                 knowledge_base_name: str,
+                 embed_model: str,
+                 kb_description: str,
+                 settings: Settings,
+                 kb_repo: KBRepository,
+                 kb_file_repo: KnowledgeFileRepository,
+                 file_doc_repo: FileDocRepository,
+                 pool_class: Type[CACHE_POOL]
+                 ):
         """
 
         :param knowledge_base_name: 知识库名称
@@ -101,7 +107,8 @@ class KBService(ABC, Generic[CACHE_POOL]):
         """
         将 List[Document] 转化为 VectorStore.add_embeddings 可以接受的参数
         """
-        return self.text_to_vec.embed_documents(docs, model_name=self.embed_model)# embed_documents(docs=docs, embed_model=self.embed_model, to_query=False)
+        return self.text_to_vec.embed_documents(docs,
+                                                model_name=self.embed_model)  # embed_documents(docs=docs, embed_model=self.embed_model, to_query=False)
 
     async def _adocs_to_embeddings(self, docs: List[Document]) -> DocEmbedResult:
         result = await self.text_to_vec.aembed_documents(docs=docs, embed_model=self.embed_model)
@@ -138,9 +145,9 @@ class KBService(ABC, Generic[CACHE_POOL]):
             doc_infos = await self.do_add_doc(docs, **kwargs)
 
             status = await self.kb_file_repo.add_file_to_db(kb_file,
-                                          custom_docs=custom_docs,
-                                          docs_count=len(docs),
-                                          doc_infos=doc_infos)
+                                                            custom_docs=custom_docs,
+                                                            docs_count=len(docs),
+                                                            doc_infos=doc_infos)
         else:
             status = False
         return status
@@ -176,7 +183,7 @@ class KBService(ABC, Generic[CACHE_POOL]):
 
     async def exist_doc(self, file_name: str):
         return await self.kb_file_repo.file_exists_in_db(KnowledgeFile(knowledge_base_name=self.kb_name,
-                                               filename=file_name))
+                                                                       filename=file_name))
 
     async def list_files(self):
         return await self.kb_file_repo.list_files_from_db(self.kb_name)
@@ -225,7 +232,8 @@ class KBService(ABC, Generic[CACHE_POOL]):
         """
         通过file_name或metadata检索Document
         """
-        doc_infos = await self.file_doc_repo.list_docs_from_db(kb_name=self.kb_name, file_name=file_name, metadata=metadata)
+        doc_infos = await self.file_doc_repo.list_docs_from_db(kb_name=self.kb_name, file_name=file_name,
+                                                               metadata=metadata)
         docs = []
         for x in doc_infos:
             doc_info = self.get_doc_by_ids([x["id"]])[0]
@@ -290,10 +298,10 @@ class KBService(ABC, Generic[CACHE_POOL]):
 
     @abstractmethod
     async def do_search(self,
-                  query: str,
-                  top_k: int,
-                  score_threshold: float,
-                  ) -> List[Tuple[Document, float]]:
+                        query: str,
+                        top_k: int,
+                        score_threshold: float,
+                        ) -> List[Tuple[Document, float]]:
         """
         搜索知识库子类
         """
@@ -301,9 +309,9 @@ class KBService(ABC, Generic[CACHE_POOL]):
 
     @abstractmethod
     async def do_add_doc(self,
-                   docs: List[Document],
-                   **kwargs,
-                   ) -> List[Dict]:
+                         docs: List[Document],
+                         **kwargs,
+                         ) -> List[Dict]:
         """
         向知识库添加文档子类
         """
@@ -322,5 +330,3 @@ class KBService(ABC, Generic[CACHE_POOL]):
         从知识库删除全部向量子类
         """
         pass
-
-

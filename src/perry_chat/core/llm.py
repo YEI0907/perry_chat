@@ -1,20 +1,22 @@
-from .config import settings
 from typing import Callable, List
+
 from langchain_openai import ChatOpenAI
+
 from perry_chat.core.config.model_config import LLMAPI
+from .config import settings
 
 
 class LLM:
-    
+
     @staticmethod
-    def get_chat_openai(  
-        model_name: str,
-        temperature: float,
-        max_tokens: int = None,
-        streaming: bool = True,
-        callbacks: List[Callable] = [],
-        verbose: bool = True,
-        **kwargs,
+    def get_chat_openai(
+            model_name: str,
+            temperature: float,
+            max_tokens: int = None,
+            streaming: bool = True,
+            callbacks: List[Callable] = [],
+            verbose: bool = True,
+            **kwargs,
     ) -> ChatOpenAI:
         """
         定义了一个用于创建 ChatOpenAI 实例的函数 get_ChatOpenAI，并且在函数参数中指定了一些默认参数和可选参数。

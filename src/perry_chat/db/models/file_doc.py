@@ -1,5 +1,6 @@
-from tortoise.models import Model
 from tortoise.fields import IntField, CharField, JSONField
+from tortoise.models import Model
+
 
 class FileDoc(Model):
     id = IntField(pk=True, description="ID")

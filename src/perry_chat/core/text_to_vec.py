@@ -1,11 +1,13 @@
+from typing import List, Dict, Optional
+
 import numpy as np
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from loguru import logger
-from perry_chat.core.config import Settings
-from typing import List, Dict, Optional, Tuple, Any
-
 from pydantic import BaseModel, Field
+
+from perry_chat.core.config import Settings
+
 
 def normalize(embeddings: List[List[float]] | List[float]) -> np.ndarray:
     """
@@ -19,6 +21,7 @@ def normalize(embeddings: List[List[float]] | List[float]) -> np.ndarray:
     norm = np.tile(norm, (1, len(embeds[0])))
     return np.divide(embeddings, norm)
 
+
 class DocEmbedResult(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
@@ -31,9 +34,10 @@ class Text2Vector:
     """
     文本向量化
     """
+
     def __init__(self,
-        settings: Settings
-    ):
+                 settings: Settings
+                 ):
         self.settings = settings
         if len(self.settings.model.embed_models) < 1:
             raise ValueError("未配置嵌入模型, 请至少配置1个嵌入模型")
@@ -46,7 +50,7 @@ class Text2Vector:
                 check_embedding_ctx_length=False,
                 show_progress_bar=True
             )
-            for k,v in self.settings.model.embed_models.items()
+            for k, v in self.settings.model.embed_models.items()
         }
         logger.debug(f"初始化文本向量化模型: {list(self.embeddings.keys())}")
 
@@ -69,9 +73,9 @@ class Text2Vector:
         return self.embeddings[model_name]
 
     def embed_texts(self,
-        texts: List[str],
-        model_name: str = None
-    ) -> np.ndarray:
+                    texts: List[str],
+                    model_name: str = None
+                    ) -> np.ndarray:
         """
         将文本列表转换为向量列表
         """
@@ -117,9 +121,9 @@ class Text2Vector:
         return None
 
     async def aembed_texts(self,
-        texts: List[str],
-        model_name: str = None
-    ) -> np.ndarray:
+                           texts: List[str],
+                           model_name: str = None
+                           ) -> np.ndarray:
         """
         将文本列表转换为向量列表
         """
@@ -127,9 +131,9 @@ class Text2Vector:
         return normalize(await self.embeddings[model_name].aembed_documents(texts))
 
     def embed_query(self,
-        text: str,
-        model_name: str = None
-    ) -> np.ndarray:
+                    text: str,
+                    model_name: str = None
+                    ) -> np.ndarray:
         """
         将文本转换为向量
         """
@@ -137,9 +141,9 @@ class Text2Vector:
         return normalize(self.embeddings[model_name].embed_query(text)).reshape(-1)
 
     async def aembed_query(self,
-        text: str,
-        model_name: str = None
-    ) ->  np.ndarray:
+                           text: str,
+                           model_name: str = None
+                           ) -> np.ndarray:
         """
         将文本转换为向量
         """
@@ -149,6 +153,7 @@ class Text2Vector:
 
 if __name__ == "__main__":
     from perry_chat.core.config import load_settings
+
     settings = load_settings()
     text2vec = Text2Vector(settings)
     texts = [

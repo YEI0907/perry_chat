@@ -1,7 +1,7 @@
 import asyncio
 import threading
-from contextlib import contextmanager, asynccontextmanager
 from collections import OrderedDict
+from contextlib import contextmanager, asynccontextmanager
 from typing import List, Any, Union, Tuple, Generator, TypeVar, Generic, AsyncGenerator
 
 from langchain_core.embeddings import Embeddings
@@ -12,10 +12,12 @@ from perry_chat.db.repository import KBRepository
 
 T = TypeVar('T')
 
+
 class ThreadSafeObject(Generic[T]):
     """
     线程安全对象类，用于保证多线程环境下对象的安全访问。
     """
+
     def __init__(self, key: Union[str, Tuple], obj: T = None, pool: "CachePool" = None):
         self._obj = obj
         self._key = key
@@ -117,12 +119,15 @@ class ThreadSafeObject(Generic[T]):
     def obj(self, val: T):
         self._obj = val
 
+
 SafeObject = TypeVar("SafeObject", bound=ThreadSafeObject)
+
 
 class CachePool(Generic[SafeObject]):
     """
     缓存池类，用于管理线程安全对象的缓存。
     """
+
     def __init__(self, kb_repo: KBRepository, text2vec: Text2Vector, cache_num: int = -1):
         self.kb_repo = kb_repo
         self.text2vec = text2vec
@@ -142,7 +147,7 @@ class CachePool(Generic[SafeObject]):
             while len(self.cache) > self._cache_num:
                 self.cache.popitem(last=False)
 
-    def get(self, key: Union[str, Tuple[str, str|None]]) -> SafeObject|None:
+    def get(self, key: Union[str, Tuple[str, str | None]]) -> SafeObject | None:
         """
         根据键获取缓存对象，并等待对象加载完成。
 
@@ -157,13 +162,13 @@ class CachePool(Generic[SafeObject]):
             return cache
         return None
 
-    async def aget(self, key: Union[str, Tuple[str, str|None]]) -> SafeObject|None:
+    async def aget(self, key: Union[str, Tuple[str, str | None]]) -> SafeObject | None:
         if cache := self.cache.get(key):
             await cache.await_for_loading()
             return cache
         return None
 
-    def set(self, key: Union[str, Tuple[str, str|None]], obj: SafeObject) -> SafeObject:
+    def set(self, key: Union[str, Tuple[str, str | None]], obj: SafeObject) -> SafeObject:
         """
          设置缓存对象。
 
@@ -178,7 +183,7 @@ class CachePool(Generic[SafeObject]):
         self._check_count()
         return obj
 
-    def pop(self, key: Union[str, Tuple[str, str|None]] = None) -> tuple[Any, SafeObject] | None:
+    def pop(self, key: Union[str, Tuple[str, str | None]] = None) -> tuple[Any, SafeObject] | None:
         """
         移除并返回缓存对象。
 
@@ -232,7 +237,6 @@ class CachePool(Generic[SafeObject]):
             self.cache.move_to_end(key)
             return cache.async_acquire(owner=owner, msg=msg)
         return None
-
 
     async def load_kb_embeddings(
             self,

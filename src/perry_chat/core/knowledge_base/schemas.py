@@ -7,3 +7,5 @@ class DocumentWithVSId(Document):
     """
     id: str = None
     score: float = 3.0
+
+

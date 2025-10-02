@@ -1,22 +1,24 @@
+import json
+import os
+import tempfile
+import warnings
+from typing import Any
+from typing import List
+
+from langchain.chains import RetrievalQA
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
 from langchain_core.documents import Document
+from rich import print
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from unstructured.partition.image import partition_image
+from unstructured.partition.pdf import partition_pdf
 
 from .interface import Pipeline
-from unstructured.partition.pdf import partition_pdf
-from unstructured.partition.image import partition_image
-from langchain_community.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains import RetrievalQA
-from typing import List
-from rich.progress import Progress, SpinnerColumn, TextColumn
-import tempfile
-import json
-import warnings
-from rich import print
-from typing import Any
-import os
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
+
 
 class UnstructuredLightPipeline(Pipeline):
     """

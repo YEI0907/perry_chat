@@ -1,18 +1,20 @@
+from typing import List, Dict
+
 from loguru import logger
 from tortoise.transactions import atomic, in_transaction
 
 from .base_repo import BaseRepository
-from ..models import KnowledgeFileModel, FileDoc
-from typing import List, Optional, Dict, Any, Tuple
+from ..models import FileDoc
+
 
 class FileDocRepository(BaseRepository[FileDoc]):
     def __init__(self):
         super().__init__(FileDoc)
 
     async def list_file_num_docs_id_by_kb_name_and_file_name(self,
-        kb_name: str,
-        file_name: str
-    ) -> List[str]:
+                                                             kb_name: str,
+                                                             file_name: str
+                                                             ) -> List[str]:
         """
         列出某知识库某文件对应的所有Document的id。
         返回形式：[str, ...]
@@ -25,10 +27,10 @@ class FileDocRepository(BaseRepository[FileDoc]):
         return list(doc_ids)
 
     async def list_docs_from_db(self,
-        kb_name: str,
-        file_name: str = None,
-        metadata: Dict = {}
-    ) -> List[Dict]:
+                                kb_name: str,
+                                file_name: str = None,
+                                metadata: Dict = {}
+                                ) -> List[Dict]:
         """
         列出某知识库某文件对应的所有Document。
         返回形式：[{"id": str, "metadata": dict}, ...]
@@ -46,14 +48,14 @@ class FileDocRepository(BaseRepository[FileDoc]):
 
     @atomic()
     async def delete_docs_from_db(self,
-        kb_name: str,
-        file_name: str = None,
-    ) -> List[Dict]:
+                                  kb_name: str,
+                                  file_name: str = None,
+                                  ) -> List[Dict]:
         """
         删除某知识库某文件对应的所有Document，并返回被删除的Document。
         返回形式：[{"id": str, "metadata": dict}, ...]
         """
-        docs =  await self.list_docs_from_db(kb_name, file_name)
+        docs = await self.list_docs_from_db(kb_name, file_name)
         query = self.model.filter(kb_name__iexact=kb_name)
         if file_name:
             query = query.filter(file_name__iexact=file_name)
@@ -61,10 +63,10 @@ class FileDocRepository(BaseRepository[FileDoc]):
         return docs
 
     async def add_docs_to_db(self,
-        kb_name: str,
-        file_name: str,
-        doc_infos: List[Dict]
-    ) -> bool:
+                             kb_name: str,
+                             file_name: str,
+                             doc_infos: List[Dict]
+                             ) -> bool:
         """
         添加某知识库某文件对应的Document到数据库。
         返回形式：[{"id": str, "metadata": dict}, ...]
@@ -82,16 +84,9 @@ class FileDocRepository(BaseRepository[FileDoc]):
                         doc_id=doc_info["id"],
                         meta_data=doc_info["metadata"]
                     )
-                    await obj.save(using_db= connection)
+                    await obj.save(using_db=connection)
                 logger.info("文档信息成功添加到数据库")
                 return True
         except Exception as e:
             logger.error(f"添加文档信息到数据库时出错：{e}")
             return False
-
-
-
-
-
-
-

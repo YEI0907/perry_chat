@@ -8,7 +8,8 @@
 '''
 import sys
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union, Any
+from typing import Dict, List, Literal, Optional, Any
+
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -31,6 +32,7 @@ class LogHandler(BaseModel):
         if self.sink == "stdout":
             self.sink = sys.stdout
         return self
+
 
 class LogConfig(BaseModel):
     """日志配置"""
