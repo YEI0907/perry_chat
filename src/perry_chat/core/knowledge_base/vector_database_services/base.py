@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Generic, TypeVar
 from typing import List, Dict, Tuple, Type
 
+import numpy as np
 from langchain_core.documents import Document
 from loguru import logger
 
@@ -107,12 +108,75 @@ class KBService(ABC, Generic[CACHE_POOL]):
         """
         将 List[Document] 转化为 VectorStore.add_embeddings 可以接受的参数
         """
-        return self.text_to_vec.embed_documents(docs,
-                                                model_name=self.embed_model)  # embed_documents(docs=docs, embed_model=self.embed_model, to_query=False)
+        from tqdm import tqdm
+
+        bs = self.settings.kb.batch_size
+        all_embeddings = []
+        all_metadatas = []
+        all_texts = []
+
+        # 按批次处理文档并显示进度条
+        for i in tqdm(range(0, len(docs), bs), desc="Embedding documents"):
+            batch_docs = docs[i:i + bs]
+            batch_result = self.text_to_vec.embed_documents(
+                batch_docs,
+                model_name=self.embed_model
+            )
+
+            all_embeddings.append(batch_result.embeddings)
+            all_metadatas.extend(batch_result.metadatas)
+            all_texts.extend(batch_result.texts)
+
+        # 返回合并后的结果
+        return DocEmbedResult(
+            embeddings=np.concatenate(all_embeddings, axis=0),
+            metadatas=all_metadatas,
+            texts=all_texts
+        )
 
     async def _adocs_to_embeddings(self, docs: List[Document]) -> DocEmbedResult:
-        result = await self.text_to_vec.aembed_documents(docs=docs, embed_model=self.embed_model)
-        return result
+        from tqdm.asyncio import tqdm_asyncio
+        import asyncio
+
+        bs = self.settings.kb.batch_size
+        # 获取最大并发数配置，如果不存在则使用默认值
+        max_concurrent = getattr(self.settings.kb, 'max_concurrent', 10)
+
+        all_embeddings = []
+        all_metadatas = []
+        all_texts = []
+
+        # 创建信号量来限制并发数
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def embed_with_semaphore(batch_docs):
+            async with semaphore:
+                return await self.text_to_vec.aembed_documents(
+                    docs=batch_docs,
+                    embed_model=self.embed_model
+                )
+
+        # 按批次处理文档并显示进度条
+        tasks = []
+        for i in range(0, len(docs), bs):
+            batch_docs = docs[i:i + bs]
+            task = embed_with_semaphore(batch_docs)
+            tasks.append(task)
+
+        # 使用异步进度条执行所有任务，限制并发数
+        results = await tqdm_asyncio.gather(*tasks, desc="Embedding documents")
+
+        # 合并所有结果
+        for result in results:
+            all_embeddings.append(result.embeddings)
+            all_metadatas.extend(result.metadatas)
+            all_texts.extend(result.texts)
+
+        return DocEmbedResult(
+            embeddings=np.concatenate(all_embeddings, axis=0),
+            metadatas=all_metadatas,
+            texts=all_texts
+        )
 
     async def add_doc(self, kb_file: KnowledgeFile, docs: List[Document] = [], **kwargs):
         """

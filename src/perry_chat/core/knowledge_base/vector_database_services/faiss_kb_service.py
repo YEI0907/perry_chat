@@ -173,7 +173,8 @@ class FaissKBService(KBService[KBFaissPool]):
         List[Dict]: 添加的文档信息。
         """
 
-        data = await asyncio.to_thread(self._docs_to_embeddings, docs)  # 将向量化单独出来可以减少向量库的锁定时间
+        #data = await asyncio.to_thread(self._docs_to_embeddings, docs)  # 将向量化单独出来可以减少向量库的锁定时间
+        data = await self._adocs_to_embeddings(docs)
 
         # 使用 await 来获取异步函数的结果
         vector_store = await self.load_vector_store()

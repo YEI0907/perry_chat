@@ -1,9 +1,9 @@
 [project]
 name = "perry-chat"
 version = "0.1.0"
-description = "Add your description here"
+description = "A RAG Chat Robot"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10, <3.13"
 dependencies = [
     "accelerate==0.32.1",
     "aerich>=0.9.1",
@@ -31,6 +31,7 @@ dependencies = [
     "loguru==0.7.2",
     "markdownify==0.13.1",
     "matplotlib>=3.10.6",
+    "ml-dtypes==0.5.3",
     "passlib==1.7.4",
     "pdfminer>=20191125",
     "psutil==6.0.0",
@@ -48,8 +49,6 @@ dependencies = [
     "sse-starlette==2.1.2",
     "strsimpy==0.2.1",
     "torch==2.3.0",
-    "torchaudio==2.3.0",
-    "torchvision==0.18.0",
     "tortoise-orm[asyncmy]>=0.25.1",
     "transformers==4.37.2",
     "unstructured[all-docs]>=0.18.15",

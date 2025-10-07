@@ -260,6 +260,16 @@ class KBConfig(BaseModel):
         description="向量搜索时的分数阈值"
     )
 
+    max_concurrent: int = Field(
+        default=20,
+        description="请求的最大并发数"
+    )
+
+    batch_size: int = Field(
+        default=16,
+        description="对文本进行处理的批次大小"
+    )
+
     chunk_size: int = Field(
         default=500,
         description="每个文本块的大小, 不适用MarkdownHeaderTextSplitter"

@@ -6,7 +6,7 @@ from pathlib import Path
 from tortoise import Tortoise
 # sys.path.append(str(Path(__file__).parent.parent / "src"))
 from perry_chat.core.config import load_settings
-from perry_chat.core.database import DataBaseMannager
+from perry_chat.core.database_manager import DataBaseManager
 from perry_chat.services.chat_service import ChatService
 from perry_chat.db.repository.user_repo import UserRepository
 from perry_chat.db.repository.message_repo import MassageRepository
@@ -14,20 +14,20 @@ from perry_chat.db.repository.conversation_repo import ConversationRepository
 from perry_chat.schemas.chat import ChatRequest
 
 async def run_chat_demo():
-    await Tortoise.init(DataBaseMannager.get_tortoise_config())
+    settings = load_settings()
+    await Tortoise.init(DataBaseManager(settings).get_tortoise_config())
     await Tortoise.generate_schemas()
     # 初始化所需的仓库
     user_repo = UserRepository()
     message_repo = MassageRepository()
     conversation_repo = ConversationRepository()
-    if not await user_repo.check_user("test_user_id"):
+    if not await user_repo.check_user("yepenglin"):
         await user_repo.create(
-        id="test_user_id",
+        id="yepenglin",
         username="叶鹏林",
         password_hash=hash("1234567")
     )
 
-    settings = load_settings()
     # 创建聊天服务实例
     chat_service = ChatService(
         user_repository=user_repo,
@@ -39,7 +39,7 @@ async def run_chat_demo():
     # 创建聊天请求
     chat_request = ChatRequest(
         query="你好，请介绍一下你自己",
-        user_id="test_user_id",
+        user_id="yepenglin",
         conversation_id=str(uuid.uuid4()),
         conversation_name="测试对话",
         prompt_name="default",

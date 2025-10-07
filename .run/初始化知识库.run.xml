@@ -6,6 +6,7 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
+      <env name="HF_ENDPOINT" value="https://hf-mirror.com" />
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="SDK_NAME" value="uv (perry_chat)" />

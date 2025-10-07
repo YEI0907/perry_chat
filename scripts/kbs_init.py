@@ -11,7 +11,6 @@ from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, File
 from perry_chat.core.knowledge_base.utils import KnowledgeFile
 from perry_chat.core.config import load_settings
 from perry_chat.core.database_manager import DataBaseManager
-from concurrent.futures import ProcessPoolExecutor
 
 
 
@@ -36,7 +35,7 @@ async def process_and_add_document(file_path, faiss_service):
             vs_type="faiss",
             embed_model=EMBED_MODEL,
             api_endpoint=API_ENDPOINT,
-            user_id="test_user_id"
+            user_id="yepenglin"
         )
 
     processor = UnstructuredLightPipeline(settings)
@@ -53,7 +52,7 @@ async def process_and_add_document(file_path, faiss_service):
 
 async def main():
     # 文件夹路径，包含所有PDF文件
-    folder_path = '/Users/lxw/Yplin/Projections/perry_chat/resources/knowledge_base/private/content'
+    folder_path = '/home/yepenglin/works/DevProjs/perry_chat/resources/knowledge_base/private/content'
     pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
 
     # 实例化 FaissKBService
@@ -75,7 +74,7 @@ async def main():
 
 async def wiki_main():
     from langchain.schema import Document
-    file_path = "/Users/lxw/Yplin/Projections/perry_chat/resources/knowledge_base/wiki/content/education.jsonl"
+    file_path = "/home/yepenglin/works/DevProjs/perry_chat/resources/knowledge_base/wiki/content/education.jsonl"
     # 创建一个空的 Document 列表
     docs = []
     # 打开文件并读取每一行
@@ -122,8 +121,8 @@ async def wiki_main():
                            kb_info="wiki",
                            vs_type="faiss",
                            embed_model=EMBED_MODEL,
-                             api_endpoint=API_ENDPOINT,
-                           user_id="test_user_id")
+                            api_endpoint=API_ENDPOINT,
+                           user_id="yepenglin")
 
     # print(faiss_service)
     # 创建 KnowledgeFile 对象，注意这里只传递文件名和知识库名称
@@ -141,7 +140,7 @@ async def sequential_execution():
     # print("处理pdf")
     # await main()
     print("处理wiki")
-    # await wiki_main()
+    await wiki_main()
 
 
 async def test_query():
