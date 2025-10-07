@@ -195,9 +195,53 @@ class KBService:
 
         return dict(code=200, msg="上传成功", data={"failed_files": failed_files})
 
-    async def update_docs(self):
-        """更新知识库文档"""
-        ...
+    async def update_docs(self,
+        knowledge_base_name: str,
+        file_names: List[str],
+        chunk_size: int = 500,
+        chunk_overlap: int = 50,
+        zh_title_enhance: bool = False,
+        override_custom_docs: bool = False,
+        docs: Dict = None,
+        not_refresh_vs_cache: bool = False
+    ):
+        """
+        更新知识库中的文档。
+        此异步函数使用给定的配置处理和更新文档。它允许各种自定义选项，例如
+        文档块大小、重叠配置、增强的标题处理，以及是否覆盖已存在的自定义文档。
+        :param knowledge_base_name: 需要更新的知识库名称。
+        :type knowledge_base_name: str
+        :param file_names: 文件名称, 支持多文件。
+        :type file_names: List[str]
+        :param chunk_size: 处理过程中使用的文档块大小。
+        默认值为500。
+        :type chunk_size: int, optional
+        :param chunk_overlap: 文档块之间重叠的标记数量。
+        默认值为50。
+        :type chunk_overlap: int, optional
+        :param zh_title_enhance: 是否应用中文标题增强处理。
+        默认值为False。
+        :type zh_title_enhance: bool, optional
+        :param override_custom_docs: 是否覆盖已存在的自定义文档。
+        默认值为False。
+        :type override_custom_docs: bool, optional
+        :param docs: 需要更新的文档字典。
+        默认值为None。
+        :type docs: Dict, optional
+        :param not_refresh_vs_cache: 是否不刷新向量存储缓存。
+        默认值为False。
+        :type not_refresh_vs_cache: bool, optional
+        :return: 表示文档更新过程完成状态。
+        :rtype: None
+        """
+        if not validate_kb_name(knowledge_base_name):
+            raise KBNameError(name=knowledge_base_name)
+        kb = await VecDBServiceFactory.get_service_by_name(knowledge_base_name)
+        if kb is None:
+            raise KBNotFoundError(knowledge_base_name)
+
+        failed_files = {}
+        kb_files = []
 
     async def delete_docs(self):
         """删除文档"""
