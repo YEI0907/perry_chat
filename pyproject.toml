@@ -34,6 +34,7 @@ dependencies = [
     "ml-dtypes==0.5.3",
     "passlib==1.7.4",
     "pdfminer>=20191125",
+    "pdfminer-six>=20250506",
     "psutil==6.0.0",
     "pydantic-settings>=2.10.1",
     "pymilvus==2.4.4",

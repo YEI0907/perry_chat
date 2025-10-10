@@ -42,3 +42,18 @@ class KBUpdateError(Exception):
                 message = "更新知识库时发生错误"
         self.message = message
         super().__init__(self.message)
+
+class KBFileNotFoundError(Exception):
+    """知识库文件未找到异常
+
+    当请求的文件在系统中不存在时抛出此异常
+    """
+    def __init__(self, name: str = None, message: str = None):
+        self.file_name = name
+        if message is None:
+            if name:
+                message = f"未找到名称为 '{name}' 的文件"
+            else:
+                message = "请求的文件未找到"
+        self.message =  message
+        super().__init__(self.message)

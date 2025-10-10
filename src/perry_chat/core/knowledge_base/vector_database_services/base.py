@@ -28,7 +28,7 @@ class SupportedVSType:
 CACHE_POOL = TypeVar('CACHE_POOL', bound=CachePool)
 
 
-class KBService(ABC, Generic[CACHE_POOL]):
+class VecDBService(ABC, Generic[CACHE_POOL]):
     """向量数据库基类"""
 
     def __init__(self,
@@ -49,7 +49,7 @@ class KBService(ABC, Generic[CACHE_POOL]):
         """
         self.settings = settings
         self.kb_name = knowledge_base_name
-        self.kb_info = kb_description
+        self.description = kb_description
         self.embed_model = embed_model
         self.kb_path = get_kb_path(self.kb_name)
         self.doc_path = get_doc_path(self.kb_name)
@@ -82,7 +82,7 @@ class KBService(ABC, Generic[CACHE_POOL]):
         self.do_create_kb()
         status = await self.kb_repo.add_kb(
             kb_name=self.kb_name,
-            kb_info=self.kb_info,
+            description=self.description,
             vs_type=self.vs_type(),
             embed_model=self.embed_model
         )
@@ -227,12 +227,12 @@ class KBService(ABC, Generic[CACHE_POOL]):
             os.remove(kb_file.filepath)
         return status
 
-    async def update_info(self, kb_info: str):
+    async def update_info(self, description: str):
         """
         更新知识库介绍
         """
-        self.kb_info = kb_info
-        status = await self.kb_repo.add_kb(self.kb_name, self.kb_info, self.vs_type(), self.embed_model)
+        self.description = description
+        status = await self.kb_repo.add_kb(self.kb_name, self.description, self.vs_type(), self.embed_model)
         return status
 
     async def update_doc(self, kb_file: KnowledgeFile, docs: List[Document] = [], **kwargs) -> bool:

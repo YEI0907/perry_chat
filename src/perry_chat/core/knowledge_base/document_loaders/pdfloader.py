@@ -13,6 +13,7 @@ from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from unstructured.partition.image import partition_image
 from unstructured.partition.pdf import partition_pdf
+from loguru import logger
 
 from .interface import Pipeline
 
@@ -51,7 +52,7 @@ class UnstructuredLightPipeline(Pipeline):
         Returns:
             Any: 处理后的文档分块列表
         """
-        print(f"\nRunning pipeline with unstructured_langchain \n")
+        logger.info(f"Running pipeline with unstructured_langchain")
 
         strategy = 'hi_res'
         model_name = 'yolox'
@@ -153,7 +154,7 @@ class UnstructuredLightPipeline(Pipeline):
         # elements_to_json(elements, filename=file_path)
         text_file = self.process_json_file(file_path, extract_tables)
 
-        loader = TextLoader(text_file)
+        loader = TextLoader(text_file, encoding='utf-8')
         documents = loader.load()
 
         return documents
@@ -206,7 +207,7 @@ class UnstructuredLightPipeline(Pipeline):
         # Write the extracted elements to the output file
         new_extension = 'txt'  # You can change this to any extension you want
         new_file_path = self.change_file_extension(input_data, new_extension)
-        with open(new_file_path, 'w') as output_file:
+        with open(new_file_path, 'w', encoding="utf-8") as output_file:
             for element in extracted_elements:
                 output_file.write(element + "\n\n")  # Adding two newlines for separation
 

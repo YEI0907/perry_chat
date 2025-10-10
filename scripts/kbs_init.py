@@ -6,7 +6,7 @@ from pathlib import Path
 import asyncio
 
 from perry_chat.core.knowledge_base.vector_database_services import VecDBServiceFactory
-from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissKBService
+from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissVecDBService
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
 from perry_chat.core.knowledge_base.utils import KnowledgeFile
 from perry_chat.core.config import load_settings
@@ -31,7 +31,7 @@ async def process_and_add_document(file_path, faiss_service):
         # 先在Mysql中创建向量数据库的基本信息
         await kb_repo.add_kb(
             kb_name="private",
-            kb_info="private",
+            description="私有知识库, 主要是一些pdf",
             vs_type="faiss",
             embed_model=EMBED_MODEL,
             api_endpoint=API_ENDPOINT,
@@ -52,11 +52,11 @@ async def process_and_add_document(file_path, faiss_service):
 
 async def main():
     # 文件夹路径，包含所有PDF文件
-    folder_path = '/home/yepenglin/works/DevProjs/perry_chat/resources/knowledge_base/private/content'
+    folder_path = 'E:/YPL/PythonWorks/DevProjections/perry_chat/resources/knowledge_base/private/content'
     pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
 
     # 实例化 FaissKBService
-    faiss_service = FaissKBService(
+    faiss_service = FaissVecDBService(
         "private",
         embed_model=EMBED_MODEL,
         kb_description="初始阶段的私有数据集",
@@ -74,7 +74,7 @@ async def main():
 
 async def wiki_main():
     from langchain.schema import Document
-    file_path = "/home/yepenglin/works/DevProjs/perry_chat/resources/knowledge_base/wiki/content/education.jsonl"
+    file_path = "E:/YPL/PythonWorks/DevProjections/perry_chat/resources/knowledge_base/wiki/content/education.jsonl"
     # 创建一个空的 Document 列表
     docs = []
     # 打开文件并读取每一行
@@ -101,7 +101,7 @@ async def wiki_main():
 
 
     # 实例化 FaissKBService
-    faiss_service = FaissKBService(
+    faiss_service = FaissVecDBService(
         "wiki",
         embed_model = EMBED_MODEL,
         kb_description = "初始阶段的公共Wiki数据集",
@@ -118,7 +118,7 @@ async def wiki_main():
         print("向量数据库不存在，正在创建...")
         # 先在Mysql中创建向量数据库的基本信息
         await kb_repo.add_kb(kb_name="wiki",
-                           kb_info="wiki",
+                           description="公共知识库, 包含wiki百科",
                            vs_type="faiss",
                            embed_model=EMBED_MODEL,
                             api_endpoint=API_ENDPOINT,
@@ -137,15 +137,15 @@ async def wiki_main():
 
 async def sequential_execution():
     await DataBaseManager(settings).init_connect()
-    # print("处理pdf")
-    # await main()
+    print("处理pdf")
+    await main()
     print("处理wiki")
     await wiki_main()
 
 
 async def test_query():
     await DataBaseManager(settings).init_connect()
-    faissService = FaissKBService(
+    faissService = FaissVecDBService(
         "private",
             embed_model = EMBED_MODEL,
             kb_description = "初始阶段的私有数据集",

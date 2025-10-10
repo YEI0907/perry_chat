@@ -8,14 +8,14 @@ from langchain_community.vectorstores import FAISS
 from loguru import logger
 
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
-from .base import KBService, SupportedVSType
+from .base import VecDBService, SupportedVSType
 # from perry_chat.core.text_to_vec import Text2Vector
 from ..kb_cache.faiss_cache import ThreadSafeFaiss, KBFaissPool
 from ..utils import KnowledgeFile, get_kb_path, get_vs_path
 from ...config import Settings
 
 
-class FaissKBService(KBService[KBFaissPool]):
+class FaissVecDBService(VecDBService[KBFaissPool]):
     """
      FaissKBService 是一个继承自 KBService 的类，用于管理和操作使用 FAISS 的知识库服务。
      """

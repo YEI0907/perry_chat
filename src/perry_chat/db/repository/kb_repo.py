@@ -14,7 +14,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
     async def add_kb(
             self,
             kb_name: str,
-            kb_info: str,
+            description: str,
             vs_type: str,
             embed_model: str,
             api_endpoint: str,
@@ -28,7 +28,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
         # defaults 字典指定了当记录存在时需要更新的字段
         await self.model.update_or_create(
             defaults={
-                "kb_info": kb_info,
+                "description": description,
                 "vs_type": vs_type,
                 "embed_model": embed_model,
                 "api_endpoint": api_endpoint,
@@ -82,7 +82,7 @@ class KBRepository(BaseRepository[KnowledgeBaseModel]):
             # 但为了安全和明确，我们手动构造字典
             return {
                 "kb_name": kb.kb_name,
-                "kb_info": kb.kb_info,
+                "description": kb.description,
                 "vs_type": kb.vs_type,
                 "embed_model": kb.embed_model,
                 "file_count": kb.file_count,

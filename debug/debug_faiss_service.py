@@ -1,6 +1,6 @@
 from perry_chat.core.database_manager import DataBaseManager
 from perry_chat.core.config import load_settings
-from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissKBService
+from perry_chat.core.knowledge_base.vector_database_services.faiss_kb_service import FaissVecDBService
 from perry_chat.core.knowledge_base.utils import KnowledgeFile
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
 
@@ -14,7 +14,7 @@ async def main():
     kb_repo = KBRepository()
     kb_file_repo = KnowledgeFileRepository()
     embed_model_name = "text-embedding-v4"
-    faiss_service = FaissKBService(
+    faiss_service = FaissVecDBService(
         "test",
         embed_model_name,
         "测试数据库",
@@ -33,7 +33,7 @@ async def main():
 
         # 先在Mysql中创建向量数据库的基本信息
         await kb_repo.add_kb(kb_name="test",
-                           kb_info="test",
+                           description="test",
                            vs_type="faiss",
                            embed_model=embed_model_name,
                             api_endpoint=settings.model.embed_models[embed_model_name].api_base_url,

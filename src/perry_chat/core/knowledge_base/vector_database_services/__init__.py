@@ -2,7 +2,7 @@ from typing import Union, Any
 
 from perry_chat.core.config import load_settings
 from perry_chat.db.repository import KBRepository, KnowledgeFileRepository, FileDocRepository
-from .base import SupportedVSType, KBService
+from .base import SupportedVSType, VecDBService
 
 
 class VecDBServiceFactory:
@@ -35,8 +35,8 @@ class VecDBServiceFactory:
         if isinstance(vector_store_type, str):
             vector_store_type = getattr(SupportedVSType, vector_store_type.upper())
         if SupportedVSType.FAISS == vector_store_type:
-            from .faiss_kb_service import FaissKBService
-            return FaissKBService(
+            from .faiss_kb_service import FaissVecDBService
+            return FaissVecDBService(
                 kb_name,
                 embed_model=embed_model,
                 kb_description=description,
@@ -62,7 +62,7 @@ class VecDBServiceFactory:
             raise ValueError(f"Unsupported vector store type: {vector_store_type}")
 
     @staticmethod
-    async def get_service_by_name(kb_name: str) -> KBService | None:
+    async def get_service_by_name(kb_name: str) -> VecDBService | None:
         """
         根据知识库名称获取知识库服务。
 
