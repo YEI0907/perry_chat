@@ -5,12 +5,15 @@ import sys
 from pathlib import Path
 from tortoise import Tortoise
 # sys.path.append(str(Path(__file__).parent.parent / "src"))
+from perry_chat.db.repository.kb_file_repo import KnowledgeFileRepository
+from perry_chat.services.kb_service import KBService
 from perry_chat.core.config import load_settings
 from perry_chat.core.database_manager import DataBaseManager
 from perry_chat.services.chat_service import ChatService
 from perry_chat.db.repository.user_repo import UserRepository
 from perry_chat.db.repository.message_repo import MassageRepository
 from perry_chat.db.repository.conversation_repo import ConversationRepository
+
 from perry_chat.schemas.chat import ChatRequest
 
 async def run_chat_demo():
@@ -30,6 +33,10 @@ async def run_chat_demo():
 
     # 创建聊天服务实例
     chat_service = ChatService(
+        kb_service=KBService(
+            kb_file_repo=KnowledgeFileRepository(),
+            settings=settings
+        ),
         user_repository=user_repo,
         massage_repository=message_repo,
         conversation_repository=conversation_repo,

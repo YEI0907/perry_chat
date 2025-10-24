@@ -1,22 +1,39 @@
 import os
 import urllib
-from typing import Dict, List, Any
-
-from langchain_core.documents import Document
 from loguru import logger
+from typing import Dict, List, Any
+from perry_chat.core.config import Settings
+from langchain_core.documents import Document
 from starlette.datastructures import UploadFile
 from perry_chat.db.repository import KnowledgeFileRepository
-from perry_chat.core.knowledge_base.exceptions import KBNameError, KBNotFoundError, KBUpdateError
+from perry_chat.core.knowledge_base.exceptions import (
+    KBNameError,
+    KBNotFoundError,
+    KBUpdateError
+)
+
+from perry_chat.core.knowledge_base.utils import (
+    validate_kb_name,
+    get_file_path,
+    run_in_thread_pool,
+    KnowledgeFile,
+    files2docs_in_thread,
+    list_files_from_folder
+)
 from perry_chat.core.knowledge_base.schemas import DocumentWithVSId
-from perry_chat.core.knowledge_base.utils import validate_kb_name, get_file_path, run_in_thread_pool, KnowledgeFile, \
-    files2docs_in_thread, list_files_from_folder
-from perry_chat.core.knowledge_base.vector_database_services import VecDBServiceFactory, VecDBService
-from perry_chat.core.config import Settings
+from perry_chat.core.knowledge_base.vector_database_services import (
+    VecDBServiceFactory,
+    VecDBService
+)
 
 
 class KBService:
 
-    def __init__(self, kb_file_repo: KnowledgeFileRepository, settings: Settings):
+    def __init__(
+            self,
+            kb_file_repo: KnowledgeFileRepository,
+            settings: Settings
+    ):
         self.kb_file_repo = kb_file_repo
         self.settings = settings
 
@@ -339,7 +356,6 @@ class KBService:
         下载知识库文档
         :param knowledge_base_name: 知识库名称
         :param file_name: 文件名称
-        :param preview: 是：浏览器内预览；否：下载
         """
         self._valid_kb_name(knowledge_base_name)
         await self._get_kb_by_name(knowledge_base_name)
@@ -360,7 +376,6 @@ class KBService:
         zh_title_enhance: bool | None = None,
         not_refresh_vs_cache: bool | None = False,
     ):
-
         """
         从内容重新创建向量存储。
         当用户可以直接复制文件到content文件夹而不是通过网络上传时，这很有用。
@@ -414,5 +429,4 @@ class KBService:
                     "doc": file_name,
                 }
             i += 1
-        if not not_refresh_vs_cache:
-            kb.save_vector_store()
+        if not not_refresh_vs_cache: kb.save_vector_store()

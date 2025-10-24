@@ -50,7 +50,7 @@ async def process_and_add_document(file_path, faiss_service):
     print(f"Added documents for {file_path}: {added_docs_info}")
 
 
-async def main():
+async def pdf_main():
     # 文件夹路径，包含所有PDF文件
     folder_path = 'E:/YPL/PythonWorks/DevProjections/perry_chat/resources/knowledge_base/private/content'
     pdf_files = [f for f in os.listdir(folder_path) if f.endswith('.pdf')]
@@ -138,7 +138,7 @@ async def wiki_main():
 async def sequential_execution():
     await DataBaseManager(settings).init_connect()
     print("处理pdf")
-    await main()
+    await pdf_main()
     print("处理wiki")
     await wiki_main()
 
